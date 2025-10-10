@@ -6,14 +6,7 @@ import { Pressable } from 'react-native';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -21,16 +14,27 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#245678',
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
+        headerShown: false,
+         headerStyle:{
+            backgroundColor: '#245678',
+          },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Home',
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialIcons 
+              name="home-filled" 
+              size={24} 
+              color={color}
+              style={{ 
+                transform: [{ scale: focused ? 1.1 : 1 }] 
+              }}/>),
+
           headerRight: () => (
             <Link href="/modal" asChild>
               <Pressable>
@@ -48,10 +52,55 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="trip"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Trips',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name="planet" 
+              size={24} 
+              color={color}
+              style={{ 
+                transform: [{ scale: focused ? 1.1 : 1 }] 
+              }}/>),
+              headerShown: true ,
+              headerTitleAlign: 'center',
+        headerShadowVisible: false,       }}
+      />
+       <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Explore Locations',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name="map" 
+              size={24} 
+              color={color}
+              style={{ 
+                transform: [{ scale: focused ? 1.1 : 1 }] 
+              }}/>),
+              headerShown: true,
+                headerTitleAlign: 'center',
+        headerShadowVisible: false,
+        }}
+      />
+       <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+         tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name="person" 
+              size={24} 
+              color={color}
+              style={{ 
+                transform: [{ scale: focused ? 1.1 : 1 }] 
+              }}/>),
+                  headerShown: true,
+         headerStyle:{
+            backgroundColor: '#245678',
+          },
+          headerShadowVisible: false,
         }}
       />
     </Tabs>
