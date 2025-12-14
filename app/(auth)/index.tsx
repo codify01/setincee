@@ -59,7 +59,7 @@ const Index = () => {
 			router.push('/(auth)/interest');
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
-				const message = error.message || 'Something went wrong';
+				const message = error.response?.data.message || 'Something went wrong';
 				console.log('Registration error:', error.response?.data.message);
 				
 				Alert.alert('Registration Error', message);
@@ -137,7 +137,7 @@ const Index = () => {
 					</View>
 
 					<View className="flex-col gap-3 mt-4">
-						<TouchableOpacity className="btn bg-blue-950 py-3 rounded">
+						<TouchableOpacity className="btn bg-blue-950 py-3 rounded" onPress={()=>router.push('/(auth)/interest')}>
 							<Text className="text-center text-white font-medium">Sign Up with Google</Text>
 						</TouchableOpacity>
 						<TouchableOpacity className="btn bg-black py-3 rounded">

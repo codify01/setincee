@@ -14,7 +14,8 @@ const LiveMap: React.FC<Props> = ({ location, loading, error }) => {
       {loading ? (
         <ActivityIndicator size="large" color="#000" />
       ) : location ? (
-        <MapView
+        <>
+          {/* <MapView
           style={{ flex: 1 }}
           initialRegion={{
             latitude: location.latitude,
@@ -24,7 +25,8 @@ const LiveMap: React.FC<Props> = ({ location, loading, error }) => {
           }}
         >
           <Marker coordinate={location} title="You are here" />
-        </MapView>
+        </MapView> */}
+        </>
       ) : (
         <Text className="text-center mt-4 text-red-500">{error}</Text>
       )}

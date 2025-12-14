@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, ScrollView, StatusBar, Platform } from 'react-native';
+import { ScrollView, StatusBar, Platform } from 'react-native';
 import Header from '@/components/home/Header';
 import SearchBar from '@/components/home/SearchBar';
 import CategoryList from '@/components/home/CategoryList';
@@ -13,14 +13,36 @@ import * as Location from 'expo-location';
 import SearchSuggestions from '@/components/home/SearchSugestions';
 import { getAllPlaces } from '@/utils/axiosIntances';
 import { Place } from '../(screens)/PlaceDetailsScreen/[id]';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Dummy data (replace with API calls)
 const categories = [
-  { id: '1', name: 'Nature', image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg" },
-  { id: '2', name: 'Cities', image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135844/samples/balloons.jpg" },
-  { id: '3', name: 'Culture', image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135824/samples/people/jazz.jpg" },
-  { id: '4', name: 'Adventure', image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/landscapes/beach-boat.jpg" },
+  { 
+    id: '1', 
+    name: 'Nature', 
+    slug: 'nature',
+    image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
+  },
+  { 
+    id: '2', 
+    name: 'Cities', 
+    slug: 'cities',
+    image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135844/samples/balloons.jpg",
+  },
+  { 
+    id: '3', 
+    name: 'Culture', 
+    slug: 'culture',
+    image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135824/samples/people/jazz.jpg",
+  },
+  { 
+    id: '4', 
+    name: 'Adventure', 
+    slug: 'adventure',
+    image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/landscapes/beach-boat.jpg",
+  },
 ];
+
 
 const recommendedPlaces = [
   {

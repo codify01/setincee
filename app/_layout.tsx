@@ -7,11 +7,11 @@ import { useEffect, useState } from 'react';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import '../global.css'
-
 import { useColorScheme } from '@/components/useColorScheme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from '@/context/AuthContext';
 import AnimatedSplash from '@/components/AnimatedSplash';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -20,7 +20,6 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  // initialRouteName: '(onboarding)',
   initialRouteName: '(onboarding)',
 };
 
@@ -34,18 +33,33 @@ export default function RootLayout() {
   });
 
   const [splashDone, setSplashDone] = useState(false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const loadOnboardingStatus = async () => {
+      try {
+        const storedValue = await AsyncStorage.getItem('hasSeenOnboarding');
+        setHasSeenOnboarding(storedValue === 'true');
+      } catch (storageError) {
+        console.error('Unable to read onboarding status', storageError);
+        setHasSeenOnboarding(false);
+      }
+    };
+
+    loadOnboardingStatus();
+  }, []);
 
     useEffect(() => {
     if (error) throw error;
   }, [error]);
 
   useEffect(() => {
-    if (loaded && splashDone) {
+    if (loaded && splashDone && hasSeenOnboarding !== null) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, splashDone])
+  }, [loaded, splashDone, hasSeenOnboarding])
 
-  if (!loaded || !splashDone) {
+  if (!loaded || !splashDone || hasSeenOnboarding === null) {
     return (
       <AnimatedSplash onAnimationEnd={() => setSplashDone(true)} />
     );
@@ -65,18 +79,18 @@ export default function RootLayout() {
   // if (!loaded) {
   //   return null;
   // }
-  return <RootLayoutNav />;
+  return <RootLayoutNav hasSeenOnboarding={hasSeenOnboarding} />;
 
 }
 
-function RootLayoutNav() {
+function RootLayoutNav({ hasSeenOnboarding }: { hasSeenOnboarding: boolean }) {
   const colorScheme = useColorScheme()
 
   return (
     // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
     <AuthProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack>
+      <Stack initialRouteName={hasSeenOnboarding ? '(auth)' : '(onboarding)'}>
         <Stack.Screen name='(onboarding)' options={{headerShown:false}}/>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />

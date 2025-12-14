@@ -70,7 +70,8 @@ const PlaceDetailsScreen: React.FC = () => {
 					{loadingLocation ? (
 						<ActivityIndicator size="large" color="#000" />
 					) : location ? (
-						<MapView
+						<>
+								{/* <MapView
 							style={{ flex: 1 }}
 							initialRegion={{
 								latitude: place.location.latitude,
@@ -80,7 +81,8 @@ const PlaceDetailsScreen: React.FC = () => {
 							}}
 						>
 							<Marker coordinate={{ latitude: place.location.latitude, longitude: place.location.longitude }} title="You are here" />
-						</MapView>
+						</MapView> */}
+						</>
 					) : (
 						// <Text className="text-center mt-4 text-red-500">{errorMsg}</Text>
 						<Text className="text-center mt-4 text-red-500">Error occured</Text>
