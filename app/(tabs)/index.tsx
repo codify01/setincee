@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StatusBar, Platform } from 'react-native';
+import { ScrollView, StatusBar, Platform, View, Text, StyleSheet} from 'react-native';
 import Header from '@/components/home/Header';
 import SearchBar from '@/components/home/SearchBar';
 import CategoryList from '@/components/home/CategoryList';
@@ -14,6 +14,9 @@ import SearchSuggestions from '@/components/home/SearchSugestions';
 import { getAllPlaces } from '@/utils/axiosIntances';
 import { Place } from '../(screens)/PlaceDetailsScreen/[id]';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import AiIcon from '../../assets/icons/ai.svg';
 
 // Dummy data (replace with API calls)
 const categories = [
@@ -89,6 +92,18 @@ const mockNearbyPlaces = [
     distance: '0.8 km',
     image: require('@/assets/images/splash/page1.png'),
   },
+    {
+    id: '2',
+    name: 'Coffee Spot',
+    distance: '0.8 km',
+    image: require('@/assets/images/splash/page1.png'),
+  },
+    {
+    id: '2',
+    name: 'Coffee Spot',
+    distance: '0.8 km',
+    image: require('@/assets/images/splash/page1.png'),
+  },
 ];
 
 const HomeScreen = () => {
@@ -153,26 +168,59 @@ const HomeScreen = () => {
   }, [errorMsg]);
 
   return (
-    <SafeAreaView className="flex-1 bg-sec" style={{ paddingTop: topPadding }}>
+    <SafeAreaView className="flex-1 bg-white" style={{ paddingTop: topPadding }}>
       <ScrollView contentContainerStyle={{ gap: 10, paddingBottom: 40 }} className="container">
         <Header firstName={user?.firstName || 'Guest'} />
         <SearchBar value={searchText} onChange={setSearchText} />
         <SearchSuggestions suggestions={searchSuggestions} onSelect={(s) => { setSearchText(s); setSearchSuggestions([]); }} />
 
-        <CategoryList categories={categories} />
+        {/* <CategoryList categories={categories} /> */}
 
+        <NearbyPlacesList data={mockNearbyPlaces} />
+        <View>
+          <View className='border border-dashed h-[200px] rounded-lg flex-col items-center justify-center gap-5'>
+                <View className='w-16 h-16 rounded-full flex justify-center items-center bg-sec'>
+                  <Ionicons name='add' size={30} color={'white'}/>
+                </View>
+                <Text className='text-center text-xl font-medium'>Create Your First Trip</Text>
+                <Text className='text-center text-neutral-200 '>Start planning your perfect itinerary</Text>
+          </View>
+        </View>
         <TrendingList data={categories} />
 
         <RecommendedList places={recommendedPlaces} />
 
-        <RecentTripList trips={recentTrips} />
-
         <LiveMap location={location} loading={loadingLocation} error={errorMsg} />
 
-        <NearbyPlacesList data={mockNearbyPlaces} />
+        <RecentTripList trips={recentTrips} />
+        
       </ScrollView>
+      <View className=' absolute bottom-72 right-5 '>
+           <LinearGradient
+                  colors={[ '#9810FA', '#155DFC']}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }} 
+                  style={styles.gradientButton}
+                >
+                  <AiIcon width={30} height={25} />
+                </LinearGradient>
+        </View>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  gradientButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 999,
+    width: 64,
+    height: 64,
+  },
+});
 
 export default HomeScreen;

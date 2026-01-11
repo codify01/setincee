@@ -37,7 +37,7 @@ const Explore: React.FC = () => {
 	}, []);
 
 	const renderCategoryItem: ListRenderItem<string> = ({ item }) => (
-		<View className="capitalize bg-pry px-5 py-2 rounded-lg mr-2">
+		<View className="capitalize bg-pry px-5 py-5 rounded-lg mr-2">
 			<Text className="text-white">{item}</Text>
 		</View>
 	);
@@ -47,7 +47,14 @@ const Explore: React.FC = () => {
 	);
 
 	return (
-		<View className="flex-1 flex-col gap-3 bg-sec px-5 py-3">
+		<View className="flex-1 flex-col gap-3 px-5 py-3">
+			<View className="flex-row justify-between items-center">
+				<View>
+					<Text className="text-3xl font-bold text-pry">Explore</Text>
+					<Text className="text-grey">Find places you'll love to visit</Text>
+				</View>
+				<Ionicons name="filter" size={24} color="#105679" />
+			</View>
 			{/* Search Bar */}
 			<View className="flex-row justify-between mb-4">
 				<View className="bg-white border border-neutral-300 w-full flex-row gap-3 items-center p-3 rounded-lg">
@@ -60,23 +67,31 @@ const Explore: React.FC = () => {
 			</View>
 
 			{/* Categories */}
-			{/* <FlatList
+			<FlatList
 				data={categories}
 				renderItem={renderCategoryItem}
 				horizontal
 				keyExtractor={(item, index) => `${item}-${index}`}
 				showsHorizontalScrollIndicator={false}
 				contentContainerStyle={{ paddingBottom: 10 }}
-			/> */}
+			/>
 
 			{/* Search Results */}
-			<FlatList
+			{/* <FlatList
 				data={places}
 				renderItem={renderResultItem}
 				keyExtractor={(item, index) => index.toString()}
 				showsVerticalScrollIndicator={false}
 				contentContainerStyle={{ paddingBottom: 80 }}
-			/>
+			/> */}
+
+			<View className='flex-row justify-between items-center'>
+				<View>
+					<Text className="text-2xl  text-pry ">What's hot right now</Text>
+					<Text>Most visited this week</Text>
+				</View>
+				<Text>See all</Text>
+			</View>
 
 			{/* Suggest a Place Button */}
 			<TouchableOpacity

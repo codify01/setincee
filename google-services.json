@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "808342927384",
+    "project_id": "bryze-21606",
+    "storage_bucket": "bryze-21606.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:808342927384:android:7bede5387af51fe12aeb6d",
+        "android_client_info": {
+          "package_name": "com.bryze.bryze"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr3HhgnJ0W3Qs0So3sjXSx4ZuRnJDt1oQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
