@@ -6,7 +6,6 @@ import {
 	ScrollView,
 	Platform,
 	TouchableOpacity,
-	Alert,
 	ActivityIndicator,
 } from 'react-native';
 import React, { useState } from 'react';
@@ -15,18 +14,23 @@ import { Link, router } from 'expo-router';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
-import { register } from '@/utils/axiosIntances'; // Make sure this is defined correctly
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { register } from '@/utils/axiosIntances';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ButtonSolid from '@/components/buttons/ButtonSolid';
+import { signInWithApple, signInWithGoogle } from '@/utils/auth/socialAuth';
+import { getDevicePushToken } from '@/utils/notifications/deviceToken';
 
 const inputFields = [
-	{ name: 'firstName', label: 'First Name', placeholder: 'Uthman', secureEntry: false },
-	{ name: 'lastName', label: 'Last Name', placeholder: 'Amole', secureEntry: false },
-	{ name: 'username', label: 'Username', placeholder: 'seun111', secureEntry: false },
-	{ name: 'email', label: 'Email', placeholder: 'amoleuthman@gmail.com', secureEntry: false },
-	{ name: 'password', label: 'Password', placeholder: '********', secureEntry: true },
-	{ name: 'confirmPassword', label: 'Confirm Password', placeholder: '********', secureEntry: true },
+	{ name: 'firstName', label: 'First Name', placeholder: 'Uthman', secureEntry: false, icon: 'person' },
+	{ name: 'lastName', label: 'Last Name', placeholder: 'Amole', secureEntry: false, icon: 'person' },
+	{ name: 'username', label: 'Username', placeholder: 'seun111', secureEntry: false, icon: 'at' },
+	{ name: 'email', label: 'Email', placeholder: 'amoleuthman@gmail.com', secureEntry: false, icon: 'mail' },
+	{ name: 'password', label: 'Password', placeholder: '********', secureEntry: true, icon: 'lock-closed' },
+	{ name: 'confirmPassword', label: 'Confirm Password', placeholder: '********', secureEntry: true, icon: 'lock-closed' },
 ] as const;
 
-type FieldName = typeof inputFields[number]['name'];
+type FieldName = (typeof inputFields)[number]['name'];
 
 const initialValues = {
 	firstName: '',
@@ -37,7 +41,7 @@ const initialValues = {
 	confirmPassword: '',
 };
 
-const validationSchema = Yup.object().shape({
+const validationSchema = Yup.object({
 	firstName: Yup.string().required('First name is required'),
 	lastName: Yup.string().required('Last name is required'),
 	username: Yup.string().required('Username is required'),
@@ -50,103 +54,199 @@ const validationSchema = Yup.object().shape({
 
 const Index = () => {
 	const [loading, setLoading] = useState(false);
+	const [submitError, setSubmitError] = useState<string | null>(null);
+	const [socialLoading, setSocialLoading] = useState<'google' | 'apple' | null>(null);
 
-	const handleSignUp = async (values: typeof initialValues) => {
+	const handleSignUp = async (values: typeof initialValues, setStatus: (v: string | null) => void) => {
 		setLoading(true);
+		setSubmitError(null);
+		setStatus(null);
 		try {
-			const response = await register(values)
-			console.log('Registration successful:', response.data);
+			await register(values);
 			router.push('/(auth)/interest');
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
-				const message = error.response?.data.message || 'Something went wrong';
-				console.log('Registration error:', error.response?.data.message);
-				
-				Alert.alert('Registration Error', message);
+				const message =
+					error.response?.data?.message ||
+					error.response?.data?.error ||
+					'Something went wrong. Please try again.';
+				setSubmitError(message);
+				setStatus(message);
 			} else {
-				Alert.alert('Error', 'An unexpected error occurred');
+				const message = 'An unexpected error occurred';
+				setSubmitError(message);
+				setStatus(message);
 			}
 		} finally {
 			setLoading(false);
 		}
 	};
 
+	const handleSocialAuth = async (provider: 'google' | 'apple') => {
+		setSocialLoading(provider);
+		setSubmitError(null);
+
+		try {
+			const { user, idToken } =
+				provider === 'google' ? await signInWithGoogle() : await signInWithApple();
+
+			const deviceToken = await getDevicePushToken().catch(() => null);
+
+			await AsyncStorage.multiSet(
+				[
+					['authProvider', provider],
+					['firebaseIdToken', idToken],
+					['firebaseUid', user.uid],
+					['devicePushToken', deviceToken ?? ''],
+				].filter(([, value]) => value !== null && value !== undefined) as [string, string][]
+			);
+
+			router.push('/(auth)/interest');
+		} catch (error: any) {
+			const message =
+				error?.message ||
+				(error?.response?.data?.message ?? 'Unable to sign in right now.');
+			setSubmitError(message);
+		} finally {
+			setSocialLoading(null);
+		}
+	};
+
 	return (
-		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }} keyboardShouldPersistTaps="handled">
-				<View className="flex-col gap-7">
-					<Ionicons name="person" size={24} className="p-1 rounded" color={'#105679'} />
-					<Text className="text-2xl font-semibold text-pry">Fill Personal Information</Text>
+		<SafeAreaView className="flex-1 bg-white">
+			<KeyboardAvoidingView
+				style={{ flex: 1 }}
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+			>
+				<ScrollView
+					contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }}
+					keyboardShouldPersistTaps="handled"
+				>
+					{/* Header */}
+					<View className="w-12 h-12 flex items-center justify-center mb-6 bg-white shadow-sm rounded-full ">
+						<Ionicons
+							name="arrow-back"
+							size={22}
+							className="p-1 rounded"
+							color={'#105679'}
+							onPress={() => router.back()}
+						/>
+					</View>
+					<View className="flex-col gap-3">
+						<View className='flex-col gap-2'>
+							<Text className="text-4xl ">
+							Create Account
+						</Text>
+						<Text className='text-grey'>
+							Join thousands of travelers worldwide
+						</Text>
+						</View>
 
-					<Formik
-						initialValues={initialValues}
-						validationSchema={validationSchema}
-						onSubmit={handleSignUp}
-					>
-						{({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-							<View className="flex-col gap-3">
-								{inputFields.map(({ name, label, placeholder, secureEntry }) => {
-									const fieldName = name as FieldName;
-									return (
-										<View key={name} className="flex-col gap-2">
-											<Text className="text-pry text-lg font-medium">{label}</Text>
-											<TextInput
-												className="py-4 px-2 border border-grey rounded-md"
-												placeholder={placeholder}
-												secureTextEntry={secureEntry}
-												value={values[fieldName]}
-												onChangeText={handleChange(fieldName)}
-												onBlur={handleBlur(fieldName)}
-												autoCapitalize="none"
-												textContentType={
-													fieldName.includes('email')
-														? 'emailAddress'
-														: fieldName.includes('password')
-														? 'password'
-														: 'name'
-												}
-											/>
-											{touched[fieldName] && errors[fieldName] && (
-												<Text className="text-red-600 text-sm">{errors[fieldName]}</Text>
-											)}
+						{/* Social Auth */}
+						<View className="flex-col gap-3 mt-4">
+							<TouchableOpacity
+								className="border border-neutral-300 py-6 rounded-lg flex-row justify-center items-center gap-2"
+								onPress={() => handleSocialAuth('google')}
+								disabled={socialLoading !== null || loading}
+							>
+								{socialLoading === 'google' ? (
+									<ActivityIndicator />
+								) : (
+									<>
+										<Ionicons name="logo-google" size={20} />
+										<Text className="text-xl">Sign Up with Google</Text>
+									</>
+								)}
+							</TouchableOpacity>
+
+							<TouchableOpacity
+								className="bg-black py-6 rounded-lg flex-row justify-center items-center gap-2"
+								onPress={() => handleSocialAuth('apple')}
+								disabled={socialLoading !== null || loading}
+							>
+								{socialLoading === 'apple' ? (
+									<ActivityIndicator color="#fff" />
+								) : (
+									<>
+										<Ionicons name="logo-apple" size={20} color="white" />
+										<Text className="text-white text-xl">Sign Up with Apple</Text>
+									</>
+								)}
+							</TouchableOpacity>
+						</View>
+
+						<View className="flex-row items-center my-6 gap-2">
+							<View className="flex-1 h-px bg-neutral-300" />
+							<Text className="text-grey">or</Text>
+							<View className="flex-1 h-px bg-neutral-300" />
+						</View>
+
+						{/* Form */}
+						<Formik
+							initialValues={initialValues}
+							validationSchema={validationSchema}
+							onSubmit={(vals, { setStatus }) => handleSignUp(vals, setStatus)}
+						>
+							{({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, status }) => (
+								<View className="flex-col gap-3">
+									{(submitError || status) && (
+										<View className="p-3 rounded-md bg-red-50 border border-red-200">
+											<Text className="text-red-700 text-sm">
+												{status || submitError}
+											</Text>
 										</View>
-									);
-								})}
-
-								<TouchableOpacity
-									className="btn bg-pry mt-4 flex items-center justify-center rounded"
-									activeOpacity={0.8}
-									onPress={handleSubmit as any}
-									disabled={loading}
-								>
-									{loading ? (
-										<ActivityIndicator color="#fff" />
-									) : (
-										<Text className="text-center text-white font-medium">Sign Up</Text>
 									)}
-								</TouchableOpacity>
-							</View>
-						)}
-					</Formik>
 
-					<View className="flex-row gap-1 justify-center mt-4">
-						<Text className="text-grey">Already have an account?</Text>
-						<Link href={'/(auth)/login'} className="text-pry font-semibold">
-							Login
-						</Link>
-					</View>
+									{inputFields.map(({ name, label, placeholder, secureEntry, icon }) => {
+										const fieldName = name as FieldName;
 
-					<View className="flex-col gap-3 mt-4">
-						<TouchableOpacity className="btn bg-blue-950 py-3 rounded" onPress={()=>router.push('/(auth)/interest')}>
-							<Text className="text-center text-white font-medium">Sign Up with Google</Text>
-						</TouchableOpacity>
-						<TouchableOpacity className="btn bg-black py-3 rounded">
-							<Text className="text-center text-white font-medium">Sign Up with Apple</Text>
-						</TouchableOpacity>
+										return (
+											<View key={name} className="gap-2">
+												<Text className="text-grey text-lg font-medium">{label}</Text>
+												<View className="py-4 px-2 border border-neutral-300 rounded-md flex-row items-center gap-2">
+													<Ionicons name={icon} size={20} color={'#d4d4d4'}/>
+													<TextInput
+														className="flex-1"
+														placeholder={placeholder}
+														placeholderTextColor={'#d4d4d4'}
+														secureTextEntry={secureEntry}
+														value={values[fieldName]}
+														onChangeText={handleChange(fieldName)}
+														onBlur={handleBlur(fieldName)}
+														autoCapitalize="none"
+													/>
+												</View>
+												{touched[fieldName] && errors[fieldName] && (
+													<Text className="text-red-600 text-sm">
+														{errors[fieldName]}
+													</Text>
+												)}
+											</View>
+										);
+									})}
+
+									<ButtonSolid
+										title="Create Account"
+										onPress={() => {
+											if (loading || isSubmitting || socialLoading) return;
+											handleSubmit();
+										}}
+										loading={loading || isSubmitting}
+									/>
+								</View>
+							)}
+						</Formik>
+
+						<View className="flex-row gap-1 justify-center mt-4">
+							<Text className="text-grey">Already have an account?</Text>
+							<Link href="/(auth)/login" className="text-sec font-semibold">
+								Login
+							</Link>
+						</View>
 					</View>
-				</View>
-			</ScrollView>
-		</KeyboardAvoidingView>
+				</ScrollView>
+			</KeyboardAvoidingView>
+		</SafeAreaView>
 	);
 };
 

@@ -1,4 +1,4 @@
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ImageBackground } from 'react-native';
 import React from 'react';
 import { Link } from 'expo-router';
 
@@ -10,27 +10,27 @@ interface TrendingCardProps {
 
 const TrendingCard = ({ name, image }:TrendingCardProps) => {
 	return (
-		<View className="mr-4 w-60 bg-white rounded-xl overflow-hidden shadow-sm">
-			<Image
+		<TouchableOpacity className="mr-4 w-60 bg-white rounded-xl overflow-hidden shadow-sm">
+			<ImageBackground
 				source={{uri: image}}
-				className="w-full h-44 rounded-lg"
+				className="w-full h-72 rounded-lg"
 				resizeMode="cover"
-			/>
-			<View className="p-3">
-				<Text className="text-xl font-medium">{name}</Text>
-				<Text className="text-base">
-					Late-night local shopping vibe with street food.”
-				</Text>
-				<View className="flex-row gap-3">
-					<Text className="font-medium text-base">Trending</Text>
-					<Text className="font-medium text-base">4.7</Text>
-					<Text className="font-medium text-base">1.2 km</Text>
+			>
+				<View className="bg-white px-3 py-2 rounded-full absolute top-2 right-2 w- items-center">
+					<Text className=''>Trending</Text>
 				</View>
-			</View>
-			<Link href={'/(screens)/CategoryScreen'} className="py-3 text-center border-t border-t-pry/30 text-pry">
-				View More
-			</Link>
-		</View>
+				<View className='absolute bottom-2 w-full px-3'>
+					<Text className='text-white text-2xl'>{name}</Text>
+					<View className='flex-row justify-between'>
+						<Text className='text-lg text-white'>Lagos</Text>
+						<View className='bg-white/50 rounded-full px-3 flex justify-center items-center'>
+							<Text>124</Text>
+						</View>
+					</View>
+				</View>
+			</ImageBackground>
+			
+		</TouchableOpacity>
 	);
 };
 

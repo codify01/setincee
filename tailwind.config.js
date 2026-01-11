@@ -6,8 +6,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        pry:"#105679",
-        sec:"#e5f7ff",
+        // pry:"#105679",
+        pry:"#155DFC",
+        // sec:"#e5f7ff",
+        sec:"#9810FA",
         ter:"#F3F4F6",
         grey:"#737373",
       },

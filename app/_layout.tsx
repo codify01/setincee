@@ -13,6 +13,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import AnimatedSplash from '@/components/AnimatedSplash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -20,7 +21,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(onboarding)',
+  initialRouteName: '(tabs)',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -33,7 +34,7 @@ export default function RootLayout() {
   });
 
   const [splashDone, setSplashDone] = useState(false);
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(false);
 
   useEffect(() => {
     const loadOnboardingStatus = async () => {

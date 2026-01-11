@@ -7,6 +7,11 @@ import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import Homeicon from '../../assets/icons/home.svg';
+import Tripicon from '../../assets/icons/location.svg';
+import Profileicon from '../../assets/icons/profile.svg';
+import Discovericon from '../../assets/icons/discover.svg';
+import SavedIcon from '../../assets/icons/save.svg'
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -19,7 +24,7 @@ export default function TabLayout() {
         // to prevent a hydration error in React Navigation v6.
         headerShown: false,
          headerStyle:{
-            backgroundColor: '#245678',
+            backgroundColor: '#fff',
           },
       }}>
       <Tabs.Screen
@@ -27,10 +32,9 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <MaterialIcons 
-              name="home-filled" 
+            <Homeicon
               size={24} 
-              color={color}
+              fill={focused ? color : 'none'}
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 
               }}/>),
@@ -51,15 +55,30 @@ export default function TabLayout() {
           ),
         }}
       />
+       <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Discover',
+          tabBarIcon: ({ color, focused }) => (
+            <Discovericon 
+             size={24} 
+              fill={focused ? color : 'none'}
+              style={{ 
+                transform: [{ scale: focused ? 1.1 : 1 }] 
+              }}/>),
+              headerShown: true,
+              headerTitleAlign: 'center',
+              headerShadowVisible: false,
+        }}
+      />
       <Tabs.Screen
         name="trip"
         options={{
           title: 'Trips',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name="planet" 
-              size={24} 
-              color={color}
+            <Tripicon 
+               size={24} 
+              fill={focused ? color : 'none'}
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 
               }}/>),
@@ -67,15 +86,15 @@ export default function TabLayout() {
               headerTitleAlign: 'center',
         headerShadowVisible: false,       }}
       />
+      
        <Tabs.Screen
-        name="explore"
+        name="saved"
         options={{
-          title: 'Explore Locations',
+          title: 'Saved',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name="map" 
-              size={24} 
-              color={color}
+            <SavedIcon 
+             size={24} 
+              fill={focused ? color : 'none'}
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 
               }}/>),
@@ -89,10 +108,9 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
          tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name="person" 
-              size={24} 
-              color={color}
+            <Profileicon
+             size={24} 
+              fill={focused ? color : 'none'}
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 
               }}/>),
