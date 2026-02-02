@@ -97,6 +97,7 @@ function RootLayoutNav({ hasSeenOnboarding }: { hasSeenOnboarding: boolean }) {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(screens)" options={{ headerShown: false }} />
         <Stack.Screen name="(modals)" options={{ presentation: 'modal', headerShown:false }} />
+         <Stack.Screen name="place" options={{  headerShown:false }} />
       </Stack>
       </GestureHandlerRootView>
     </AuthProvider>

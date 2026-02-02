@@ -66,7 +66,7 @@ export default function TabLayout() {
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 
               }}/>),
-              headerShown: true,
+              headerShown: false,
               headerTitleAlign: 'center',
               headerShadowVisible: false,
         }}

@@ -19,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ firstName }) => {
 				<View>
 					<View className="flex-row">
 						<Text className="text-xl text-grey">Welcome Back, </Text>
-						<Text className="text-xl text-pry">{firstName}</Text>
+						<Text className="text-xl text-[pry]">{firstName}</Text>
 					</View>
 					<View className="flex-row gap-1">
 						<Ionicons name="location" size={20} color={'#155dfc'}/>

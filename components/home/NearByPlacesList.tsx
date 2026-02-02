@@ -37,7 +37,10 @@ const NearbyPlacesList: React.FC<Props> = ({ data }) => {
 
   return (
     <View className="mb-6">
+      <View className='flex-row justify-between'>
       <Text className="text-2xl font-medium mb-4">Popular Near You</Text>
+      <Text className="text-xl font-medium mb-4 text-[#105679]">Sell all</Text>
+      </View>
       <FlatList
         data={data}
         horizontal

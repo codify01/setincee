@@ -24,6 +24,7 @@ const _layout = () => {
             	<Stack.Screen
 				name="interest"
 				options={{
+					headerShown:false,
                     headerTitle:()=>null,
                     headerShadowVisible:false,
                     headerLeft:()=><Ionicons name='chevron-back' size={24}/>

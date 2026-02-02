@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StatusBar, Platform, View, Text, StyleSheet} from 'react-native';
+import { useRouter } from 'expo-router';
 import Header from '@/components/home/Header';
 import SearchBar from '@/components/home/SearchBar';
 import CategoryList from '@/components/home/CategoryList';
@@ -17,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AiIcon from '../../assets/icons/ai.svg';
+import CategoryTab from '@/components/home/CategoryTab';
 
 // Dummy data (replace with API calls)
 const categories = [
@@ -106,7 +108,26 @@ const mockNearbyPlaces = [
   },
 ];
 
+ const categoriesData = [
+  { 
+    id: '1',
+    title: 'Food & Restaurant', 
+    image: require('@/assets/images/food.jpg') 
+  },
+  { 
+    id: '2',
+    title: 'Cinemas', 
+    image: require('@/assets/images/pack.jpg') 
+  },
+  { 
+    id: '3',
+    title: 'Parks', 
+    image: require('@/assets/images/cinema.jpg') 
+  },
+
+];
 const HomeScreen = () => {
+  const router = useRouter();
   const { user } = useAuth();
   const topPadding = Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0;
   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
@@ -116,6 +137,7 @@ const HomeScreen = () => {
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
 //   const [categories, setCategories] = useState();
   const [recommendedPlaces, setRecommendedPlaces] = useState<Place[]>();
+  const [activeCategory, setActiveCategory] = useState('Food & Restaurant');
 
   useEffect(() => {
     (async () => {
@@ -171,7 +193,21 @@ const HomeScreen = () => {
     <SafeAreaView className="flex-1 bg-white" style={{ paddingTop: topPadding }}>
       <ScrollView contentContainerStyle={{ gap: 10, paddingBottom: 40 }} className="container">
         <Header firstName={user?.firstName || 'Guest'} />
+
         <SearchBar value={searchText} onChange={setSearchText} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="gap-3">
+          {categoriesData.map((category) => (
+            <CategoryTab
+              key={category.id}
+              title={category.title}
+              imageSource={category.image}
+              isActive={activeCategory === category.title}
+              onPress={() => setActiveCategory(category.title)}
+              showImage={true}
+              imageSize={22}
+            />
+          ))}
+        </ScrollView>
         <SearchSuggestions suggestions={searchSuggestions} onSelect={(s) => { setSearchText(s); setSearchSuggestions([]); }} />
 
         {/* <CategoryList categories={categories} /> */}
