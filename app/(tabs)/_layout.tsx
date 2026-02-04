@@ -19,7 +19,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#245678',
+        tabBarActiveTintColor: '#3b82f6',
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
         headerShown: false,
@@ -33,7 +33,8 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
             <Homeicon
-              size={24} 
+              width={24} 
+              height={24}
               fill={focused ? color : 'none'}
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 
@@ -61,7 +62,8 @@ export default function TabLayout() {
           title: 'Discover',
           tabBarIcon: ({ color, focused }) => (
             <Discovericon 
-             size={24} 
+             width={24} 
+              height={24}
               fill={focused ? color : 'none'}
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 
@@ -74,15 +76,16 @@ export default function TabLayout() {
       <Tabs.Screen
         name="trip"
         options={{
-          title: 'Trips',
+          title: 'Trip',
           tabBarIcon: ({ color, focused }) => (
             <Tripicon 
-               size={24} 
+               width={24} 
+              height={24}
               fill={focused ? color : 'none'}
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 
               }}/>),
-              headerShown: true ,
+              headerShown: false ,
               headerTitleAlign: 'center',
         headerShadowVisible: false,       }}
       />
@@ -93,12 +96,13 @@ export default function TabLayout() {
           title: 'Saved',
           tabBarIcon: ({ color, focused }) => (
             <SavedIcon 
-             size={24} 
+             width={24} 
+              height={24}
               fill={focused ? color : 'none'}
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 
               }}/>),
-              headerShown: true,
+              headerShown: false,
                 headerTitleAlign: 'center',
         headerShadowVisible: false,
         }}
@@ -109,7 +113,8 @@ export default function TabLayout() {
           title: 'Profile',
          tabBarIcon: ({ color, focused }) => (
             <Profileicon
-             size={24} 
+             width={24} 
+              height={24}
               fill={focused ? color : 'none'}
               style={{ 
                 transform: [{ scale: focused ? 1.1 : 1 }] 

@@ -12,6 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from '@/context/AuthContext';
 import AnimatedSplash from '@/components/AnimatedSplash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StatusBar } from 'expo-status-bar';
 
 
 export {
@@ -92,12 +93,15 @@ function RootLayoutNav({ hasSeenOnboarding }: { hasSeenOnboarding: boolean }) {
     <AuthProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack initialRouteName={hasSeenOnboarding ? '(auth)' : '(onboarding)'}>
+         <StatusBar style="auto" />
         <Stack.Screen name='(onboarding)' options={{headerShown:false}}/>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(screens)" options={{ headerShown: false }} />
         <Stack.Screen name="(modals)" options={{ presentation: 'modal', headerShown:false }} />
          <Stack.Screen name="place" options={{  headerShown:false }} />
+         <Stack.Screen name="create-trip" options={{  headerShown:false }} />
+         <Stack.Screen name="trip/[id]" options={{  headerShown:false }} />
       </Stack>
       </GestureHandlerRootView>
     </AuthProvider>

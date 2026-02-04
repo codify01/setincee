@@ -1,211 +1,159 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Modal,
-  ScrollView,
-} from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import AiIcon from '../../assets/icons/ai.svg';
 import { router } from 'expo-router';
-import { getItineraries } from '@/utils/axiosIntances';
 
-interface Itinerary {
-  id: string;
-  title: string;
-  destinations: string[];
-  dateRange: string;
-  startDate: string;
-  endDate: string;
-  progress: string;
+interface Trip {
+    id: string;
+    name: string;
+    destination: string;
+    duration: string;
+    travelers: number;
+    image: string;
 }
 
-const mockItineraries: Itinerary[] = [
-  {
-    id: '1',
-    title: 'Lagos Weekend Getaway',
-    destinations: ['Lekki', 'Victoria Island'],
-    dateRange: '2025-05-18 – 2025-05-21',
-    startDate: '2025-05-18',
-    endDate: '2025-05-21',
-    progress: '3/5 places visited',
-  },
-  {
-    id: '2',
-    title: 'Ogbomoso Cultural Tour',
-    destinations: ['Oja Igbo', 'Palace Museum'],
-    dateRange: '2025-06-05 – 2025-06-10',
-    startDate: '2025-06-05',
-    endDate: '2025-06-10',
-    progress: '2/6 places visited',
-  },
+const mockTrips: Trip[] = [
+    {
+        id: '1',
+        name: 'Summer Vacation',
+        destination: 'Cape Town, South Africa',
+        duration: '15 Days',
+        travelers: 1,
+        image: 'https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg',
+    },
+    {
+        id: '2',
+        name: 'Winter Getaway',
+        destination: 'New York City, USA',
+        duration: '7 Days',
+        travelers: 2,
+        image: 'https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135844/samples/balloons.jpg',
+    },
 ];
 
-const ItineraryCard = ({ item }: { item: Itinerary }) => (
-  <TouchableOpacity
-    className="bg-white rounded-2xl p-4 flex-row items-center gap-3 shadow-md"
-    onPress={() => router.push(`/itinerary/${item.id}`)}
-    accessible
-    accessibilityLabel={`Open itinerary for ${item.title}`}
-  >
-    <Image
-      source={require('../../assets/images/splash/page1.png')}
-      className="w-24 h-24 rounded-lg"
-    />
-    <View className="flex-col flex-1">
-      <Text className="text-gray-600 text-sm">{item.startDate.split("T")[0]} - {item.endDate.split("T")[0]}</Text>
-      <Text className="text-lg font-semibold text-pry mt-1">{item.title}</Text>
-      <Text className="text-sm text-gray-500 truncate">
-        {item.places?.map(p => p.place?.name).join(", ")}
-      </Text>
-      <Text className="text-xs text-green-600 mt-1">{item.progress.visited}/{item.progress.total} places</Text>
-      <View className="flex-row gap-2 mt-2">
-        <View className="flex-row items-center bg-pry px-3 py-1 rounded-md">
-          <Ionicons name="map-outline" size={16} color="#fff" />
-          <Text className="text-xs text-white ml-1">Map</Text>
-        </View>
-        <View className="flex-row items-center bg-pry px-3 py-1 rounded-md">
-          <Ionicons name="checkmark-done-outline" size={16} color="#fff" />
-          <Text className="text-xs text-white ml-1">Checklist</Text>
-        </View>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
+const styles = StyleSheet.create({
+    gradientButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1, 
+    },
+});
 
-const TripScreen: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [itineraries, setItineraries] = useState<Itinerary[]>(mockItineraries);
-  const [modalVisible, setModalVisible] = useState(false);
+const Trips: React.FC = () => {
+    const hasTrips = mockTrips.length > 0; 
 
-
-  useEffect(()=>{
-    const fetchData = async()=>{
-      try {
-        const response = await getItineraries();
-        setItineraries(response.data.data);
-        console.log(response.data.data);
-      } catch (error) {
-        console.error('Error fetching itineraries:', error.response?.data || error.message);
-      }
-    }
-    fetchData();
-  },[])
-
-  const filteredItineraries = useMemo(() => {
-    if (!selectedDate) return itineraries;
-    return itineraries.filter(
-      (item) => selectedDate >= item.startDate && selectedDate <= item.endDate
-    );
-  }, [selectedDate, itineraries]);
-
-  return (
-    <View className="flex-1 bg-sec px-5 pt-5">
-      {/* Calendar Section */}
-      <Calendar
-        onDayPress={(day) => setSelectedDate(day.dateString)}
-        markedDates={
-          selectedDate
-            ? {
-                [selectedDate]: {
-                  selected: true,
-                  marked: true,
-                  selectedColor: '#3B82F6',
-                },
-              }
-            : undefined
-        }
-        theme={{
-          backgroundColor: '#F9FAFB',
-          calendarBackground: '#F9FAFB',
-          textSectionTitleColor: '#9CA3AF',
-          selectedDayBackgroundColor: '#3B82F6',
-          selectedDayTextColor: '#FFFFFF',
-          todayTextColor: '#10B981',
-          dayTextColor: '#111827',
-          textDisabledColor: '#D1D5DB',
-          arrowColor: '#245678',
-          monthTextColor: '#111827',
-          textMonthFontWeight: 'bold',
-          textDayFontWeight: '500',
-          textDayHeaderFontWeight: '600',
-          textMonthFontSize: 18,
-          textDayFontSize: 16,
-          textDayHeaderFontSize: 14,
-        }}
-        style={{
-          marginBottom: 20,
-          borderRadius: 16,
-          overflow: 'hidden',
-        }}
-      />
-
-      {/* Create New Itinerary */}
-      <TouchableOpacity
-        className="flex-row items-center justify-center bg-pry py-4 rounded-xl mb-6 shadow-lg"
-        onPress={() => router.push('(modals)/CreateItinerary')}
-      >
-        <Ionicons name="add-circle-outline" size={20} color="#fff" />
-        <Text className="text-white text-base font-semibold ml-2">
-          Create New Itinerary
-        </Text>
-      </TouchableOpacity>
-
-      <Text className="text-xl font-bold mb-3 text-pry">
-        {selectedDate ? `Trips on ${selectedDate}` : 'Saved Itineraries'}
-      </Text>
-
-      {filteredItineraries.length > 0 ? (
-        <FlatList
-          data={filteredItineraries}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ItineraryCard item={item} />}
-          ItemSeparatorComponent={() => <View className="h-4" />}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-        />
-      ) : (
-        <View className="items-center mt-10">
-          <Ionicons name="calendar-outline" size={40} color="#9CA3AF" />
-          <Text className="text-gray-500 text-center mt-2">
-            No itineraries for this date.
-          </Text>
-        </View>
-      )}
-
-      <Modal
-              animationType="slide"
-              transparent
-              visible={modalVisible}
-              onRequestClose={() => setModalVisible(false)}
-            >
-              <View className="flex-1 bg-black/50 justify-center items-center px-4">
-                <View className="bg-white border border-pry w-full rounded-xl p-6 max-h-[80%]">
-                  <Text className="text-xl font-bold text-gray-800 mb-4">Preview Itinerary</Text>
-                  
-                  <View className="flex-row justify-between mt-4">
-                    <TouchableOpacity
-                      className="flex-1 py-3 mr-2 border border-gray-300 rounded-xl items-center"
-                      onPress={() => setModalVisible(false)}
-                    >
-                      <Text className="text-gray-700 font-semibold">Cancel</Text>
+    const renderTripCard = ({ item }: { item: Trip }) => (
+        <TouchableOpacity
+            className="bg-white rounded-2xl overflow-hidden mb-4 shadow-sm border border-gray-100"
+            onPress={() => router.push(`/trip/${item.id}`)} 
+        >
+            <Image source={{ uri: item.image }} className="w-full h-40" resizeMode="cover" />
+            <View className="p-4">
+                <View className="flex-row justify-between items-center mb-2">
+                    <Text className="text-xl font-bold text-gray-900">{item.name}</Text>
+                    <TouchableOpacity>
+                        <Ionicons name="ellipsis-horizontal" size={24} color="#6b7280" />
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      className="flex-1 py-3 ml-2 bg-pry rounded-xl items-center"
-                      // onPress={saveItinerary}
-                    >
-                      <Text className="text-white font-semibold">Confirm & Save</Text>
-                    </TouchableOpacity>
-                  </View>
                 </View>
-              </View>
-            </Modal>
-      
-    </View>
-  );
+                <Text className="text-gray-600 text-base mb-1">{item.destination}</Text>
+                <View className="flex-row items-center gap-4 mt-2">
+                    <View className="flex-row items-center">
+                        <Ionicons name="calendar-outline" size={16} color="#6b7280" />
+                        <Text className="text-gray-500 text-sm ml-1">{item.duration}</Text>
+                    </View>
+                    <View className="flex-row items-center">
+                        <Ionicons name="person-outline" size={16} color="#6b7280" />
+                        <Text className="text-gray-500 text-sm ml-1">{item.travelers} traveler{item.travelers > 1 ? 's' : ''}</Text>
+                    </View>
+                </View>
+                <View className='flex-row justify-between mt-4 items-center border-t border-gray-300 pt-3'>
+                <Text className='font-thin text-gray-900'>2 place added</Text>
+                <TouchableOpacity 
+                    className=" py-2 px-4 rounded-full items-center"
+                    onPress={() => router.push(`/trip/${item.id}`)}
+                >
+                    <Text className="text-blue-600 font-base">View Details </Text>
+                </TouchableOpacity>
+                </View>
+
+            </View>
+        </TouchableOpacity>
+    );
+
+    if (hasTrips) {
+        return (
+            <View className="flex-1 pt-12 px-5">
+                {/* Header */}
+                <View className="mb-8 border-b border-gray-200 pb-4 pt-10">
+                    <Text className="text-4xl text-gray-900">My Trips</Text>
+                    <Text className="text-gray-500 text-base">Plan and organize your adventures</Text>
+                </View>
+
+                {/* Trips List */}
+                <FlatList
+                    data={mockTrips}
+                    renderItem={renderTripCard}
+                    keyExtractor={(item) => item.id}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 80 }}
+                />
+
+                {/* Floating Action Button */}
+                <TouchableOpacity
+                    className="absolute bottom-8 right-5 w-16 h-16 rounded-full bg-blue-600 items-center justify-center shadow-lg"
+                    onPress={() => router.push('/create-trip')} // Assuming a route for creating a trip
+                >
+                    <Ionicons name="add" size={30} color="white" />
+                </TouchableOpacity>
+            </View>
+        );
+    } else {
+        return (
+            <View className="flex-1 pt-16 px-5">
+                {/* Header */}
+                <View className="mb-8 border-b border-gray-200 pb-4 pt-10">
+                    <Text className="text-4xl text-gray-900">My Trips</Text>
+                    <Text className="text-gray-500 text-base">Plan and organize your adventures</Text>
+                </View>
+
+                {/* Empty State Content */}
+                <View className="flex-1 justify-center items-center px-4 -mt-20">
+                    <View className="w-32 h-32 rounded-full bg-blue-100 items-center justify-center mb-6">
+                        <Ionicons name="map-outline" size={60} color="#3b82f6" />
+                    </View>
+                    <Text className="text-xl font-bold text-gray-800 text-center mb-2">No trips yet</Text>
+                    <Text className="text-gray-500 text-base text-center mb-8 px-4">
+                        Start planning your perfect itinerary and add places you want to visit.
+                    </Text>
+
+                    {/* Create Your First Trip Button */}
+                    <TouchableOpacity 
+                        className="w-full h-14 bg-blue-600 rounded-full flex-row items-center justify-center mb-4"
+                        onPress={() => router.push('/create-trip')} // Assuming a route for creating a trip
+                    >
+                        <Ionicons name="add-circle-outline" size={24} color="white" />
+                        <Text className="text-white text-lg font-semibold ml-2">Create Your First Trip</Text>
+                    </TouchableOpacity>
+
+                    {/* Try AI Assistant Button */}
+                    <TouchableOpacity onPress={() => router.push('/bot/botchat')} className="w-full h-14 rounded-full overflow-hidden">
+                        <LinearGradient
+                            colors={['#9810FA', '#155DFC']}
+                            start={{ x: 1, y: 0 }}
+                            end={{ x: 0, y: 1 }}
+                            style={styles.gradientButton}
+                        >
+                            <AiIcon width={24} height={20} />
+                            <Text className="text-white text-lg font-semibold ml-2">Try AI Assistant</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    }
 };
 
-export default TripScreen;
+export default Trips;
