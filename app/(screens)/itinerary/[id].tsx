@@ -26,6 +26,68 @@ interface Itinerary {
   notes?: string;
 }
 
+const normalizeItinerary = (raw: any): Itinerary | null => {
+  if (!raw) return null;
+  const source = raw.itinerary || raw.data || raw;
+  const title = source.title || source.name || "Itinerary";
+  const startDate = source.startDate || source.start || source.dateStart;
+  const endDate = source.endDate || source.end || source.dateEnd;
+  const notes = source.notes || source.description;
+
+  const places: Destination[] = [];
+
+  if (Array.isArray(source.places)) {
+    source.places.forEach((p: any, index: number) => {
+      const placeObj = p.place || p;
+      if (!placeObj) return;
+      places.push({
+        _id: p._id || placeObj._id || `${index}`,
+        place: {
+          _id: placeObj._id || p.placeId || `${index}`,
+          name: placeObj.name || placeObj.title || "Place",
+          address: placeObj.address || placeObj.location,
+        },
+        day: p.day ?? p.dayNumber ?? 1,
+        visited: p.visited ?? p.completed,
+      });
+    });
+  } else if (Array.isArray(source.days)) {
+    source.days.forEach((day: any, dayIndex: number) => {
+      const dayNumber = day.day ?? day.dayNumber ?? dayIndex + 1;
+      const blocks = day.blocks || day.items || day.activities || [];
+      if (!Array.isArray(blocks)) return;
+      blocks.forEach((block: any, blockIndex: number) => {
+        const placeObj = block.place || block.location || block;
+        const name = placeObj?.name || block.title || block.name;
+        if (!name) return;
+        places.push({
+          _id: block._id || placeObj?._id || `${dayIndex}-${blockIndex}`,
+          place: {
+            _id: placeObj?._id || block.placeId || `${dayIndex}-${blockIndex}`,
+            name,
+            address: placeObj?.address || block.address,
+          },
+          day: dayNumber,
+          visited: block.visited ?? block.completed,
+        });
+      });
+    });
+  }
+
+  if (!startDate || !endDate || places.length === 0) {
+    return null;
+  }
+
+  return {
+    _id: source._id || source.id || "itinerary",
+    title,
+    startDate,
+    endDate,
+    places,
+    notes,
+  };
+};
+
 const ItineraryDetails: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>(); // route param
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
@@ -35,9 +97,9 @@ const ItineraryDetails: React.FC = () => {
     const fetchItinerary = async () => {
       try {
         const response = await getItineraryById(id!); // backend call
-        if (response?.data?.data) {
-          setItinerary(response.data.data);
-        }
+        const payload = response?.data?.data ?? response?.data;
+        const normalized = normalizeItinerary(payload);
+        if (normalized) setItinerary(normalized);
       } catch (error) {
         console.error("Failed to fetch itinerary:", error);
       } finally {

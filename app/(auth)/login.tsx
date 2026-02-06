@@ -218,14 +218,13 @@ const Login = () => {
 									})}
 
 									<ButtonSolid
-									onPress={() => router.push('(auth)/interest')}
-									 
-										title="Create Account"
-										// onPress={() => {
-										// 	if (loading || isSubmitting || socialLoading) return;
-										// 	handleSubmit();
-										// }}
-										// loading={loading || isSubmitting}
+									// onPress={() => router.push('(auth)/interest')}
+										title="Login"
+										onPress={() => {
+											if (loading || isSubmitting || socialLoading) return;
+											handleSubmit();
+										}}
+										loading={loading || isSubmitting}
 									/>
 								</View>
 							)}

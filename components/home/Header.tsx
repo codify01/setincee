@@ -4,9 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 
 interface HeaderProps {
 	firstName: string;
+	locationText?: string | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ firstName }) => {
+const Header: React.FC<HeaderProps> = ({ firstName, locationText }) => {
 	return (
 		<View className="flex-row items-start justify-between">
 			<View className="flex-row gap-3">
@@ -24,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({ firstName }) => {
 					<View className="flex-row gap-1">
 						<Ionicons name="location" size={20} color={'#155dfc'}/>
 						<Text className="text-xl font-medium text-pry">
-							Ogbomosho, Oyo State
+							{locationText || 'Location unavailable'}
 						</Text>
 					</View>
 				</View>

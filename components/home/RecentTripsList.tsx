@@ -15,7 +15,7 @@ interface Props {
 const RecentTripList: React.FC<Props> = ({ trips }) => {
   const renderItem = ({ item }: { item: Trip }) => (
     <TouchableOpacity className="mr-4 w-48 rounded-xl overflow-hidden bg-white border border-gray-200 active:opacity-80">
-      <Image source={item.image} className="w-full h-24" resizeMode="cover" />
+      <Image source={typeof item.image === 'string' ? { uri: item.image } : item.image} className="w-full h-24" resizeMode="cover" />
       <View className="p-2">
         <Text className="text-lg font-semibold">{item.name}</Text>
         <Text className="text-sm text-gray-500">Date: {item.date}</Text>

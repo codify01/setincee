@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { createTrip } from '@/utils/axiosIntances';
 
 const CreateTripStep3: React.FC = () => {
-    const { tripName, destination, tripType, startDate, endDate, travelers } = useLocalSearchParams();
+    const { tripName, destination, tripType, startDate, endDate, travelers, cityId, pace, interests, preferredStartHour, preferredEndHour, allowSameDayCityTravel } = useLocalSearchParams();
     const [description, setDescription] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const formattedStartDate = startDate ? new Date(startDate as string).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
     const formattedEndDate = endDate ? new Date(endDate as string).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
@@ -18,18 +21,56 @@ const CreateTripStep3: React.FC = () => {
         return `${diffDays} days`;
     };
 
-    const handleCreateTrip = () => {
-        const newTrip = {
-            tripName,
-            destination,
-            tripType,
-            startDate,
-            endDate,
-            travelers,
-            description,
-        };
-        console.log('New Trip Created:', newTrip);
-        router.push('/(tabs)/trip'); 
+    const toDateOnly = (iso?: string | string[]) => {
+        if (!iso || typeof iso !== 'string') return '';
+        const date = new Date(iso);
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const handleCreateTrip = async () => {
+        if (!cityId || typeof cityId !== 'string') {
+            setError('Please select a city before creating a trip.');
+            return;
+        }
+        setSubmitting(true);
+        setError(null);
+        try {
+            let parsedInterests: string[] = [];
+            if (typeof interests === 'string') {
+                try {
+                    parsedInterests = JSON.parse(interests);
+                } catch {
+                    parsedInterests = [];
+                }
+            }
+            const payload = {
+                title: tripName,
+                description,
+                cities: [{ cityId, name: destination }],
+                startDate: toDateOnly(startDate as string),
+                endDate: toDateOnly(endDate as string),
+                preferences: {
+                    pace: typeof pace === 'string' ? pace : 'normal',
+                    interests: parsedInterests.length ? parsedInterests : [String(tripType)],
+                    allowSameDayCityTravel: allowSameDayCityTravel === 'true',
+                    preferredStartHour: Number(preferredStartHour) || 9,
+                    preferredEndHour: Number(preferredEndHour) || 18,
+                },
+                selectedPlaces: [],
+            };
+           const response = await createTrip(payload);
+           console.log('====================================');
+           console.log(response);
+           console.log('====================================');
+            router.push('/(tabs)/trip');
+        } catch (e) {
+            setError('Failed to create trip. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -82,14 +123,19 @@ const CreateTripStep3: React.FC = () => {
                 </View>
 
                 {/* Create Trip Button */}
+                {error && <Text className="text-red-500 text-sm mb-3">{error}</Text>}
                 <TouchableOpacity
                     className={`w-full h-14 rounded-full flex-row items-center justify-center mb-6 ${
-                        !tripName || !destination || !tripType || !startDate || !endDate || !travelers ? 'bg-blue-400 opacity-50' : 'bg-blue-600'
+                        !tripName || !destination || !tripType || !startDate || !endDate || !travelers || submitting ? 'bg-blue-400 opacity-50' : 'bg-blue-600'
                     }`}
                     onPress={handleCreateTrip}
-                    disabled={!tripName || !destination || !tripType || !startDate || !endDate || !travelers}
+                    disabled={!tripName || !destination || !tripType || !startDate || !endDate || !travelers || submitting}
                 >
-                    <Text className="text-white text-lg font-semibold">+ Create Trip</Text>
+                    {submitting ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text className="text-white text-lg font-semibold">+ Create Trip</Text>
+                    )}
                 </TouchableOpacity>
             </ScrollView>
         </View>
@@ -97,4 +143,3 @@ const CreateTripStep3: React.FC = () => {
 };
 
 export default CreateTripStep3;
-

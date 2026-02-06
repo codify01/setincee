@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const CreateTripStep2: React.FC = () => {
-    const { tripName, destination, tripType } = useLocalSearchParams();
+    const { tripName, destination, tripType, cityId } = useLocalSearchParams();
 
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
@@ -13,6 +13,13 @@ const CreateTripStep2: React.FC = () => {
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
     const [travelers, setTravelers] = useState(1);
     const [dateError, setDateError] = useState<string | null>(null);
+    const [pace, setPace] = useState<'slow' | 'normal' | 'fast'>('normal');
+    const [interests, setInterests] = useState<string[]>([]);
+    const [preferredStartHour, setPreferredStartHour] = useState('9');
+    const [preferredEndHour, setPreferredEndHour] = useState('18');
+    const [allowSameDayCityTravel, setAllowSameDayCityTravel] = useState(false);
+
+    const interestOptions = ['food', 'museums', 'nature', 'nightlife', 'shopping', 'family'];
 
     const onStartDateChange = (event: any, selectedDate?: Date) => {
         const currentDate = selectedDate || startDate;
@@ -47,7 +54,20 @@ const CreateTripStep2: React.FC = () => {
         }
         router.push({
             pathname: '/create-trip/step-3',
-            params: { tripName, destination, tripType, startDate: startDate.toISOString(), endDate: endDate.toISOString(), travelers },
+            params: {
+                tripName,
+                destination,
+                tripType,
+                cityId,
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                travelers,
+                pace,
+                interests: JSON.stringify(interests),
+                preferredStartHour,
+                preferredEndHour,
+                allowSameDayCityTravel: String(allowSameDayCityTravel),
+            },
         });
     };
 
@@ -81,6 +101,8 @@ const CreateTripStep2: React.FC = () => {
             <View className="w-full h-2 bg-gray-200 rounded-full mb-8">
                 <View className="w-2/3 h-full bg-blue-600 rounded-full" />
             </View>
+
+        <ScrollView>
 
             <Text className="text-xl text-gray-800 mb-3">When are you traveling?</Text>
           
@@ -143,8 +165,90 @@ const CreateTripStep2: React.FC = () => {
                 </View>
             </View>
 
+            {/* Preferences */}
+            <View className="mb-8">
+                <Text className="text-xl text-gray-800 mb-3">Preferences</Text>
+
+                <Text className="text-gray-700 text-base font-semibold mb-2">Pace</Text>
+                <View className="flex-row gap-3 mb-4">
+                    {(['slow', 'normal', 'fast'] as const).map((option) => (
+                        <TouchableOpacity
+                            key={option}
+                            className={`px-4 py-2 rounded-full border ${
+                                pace === option ? 'bg-blue-50 border-blue-500' : 'border-gray-300'
+                            }`}
+                            onPress={() => setPace(option)}
+                        >
+                            <Text className={`${pace === option ? 'text-blue-600' : 'text-gray-700'}`}>
+                                {option}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
+                <Text className="text-gray-700 text-base font-semibold mb-2">Interests</Text>
+                <View className="flex-row flex-wrap gap-2 mb-4">
+                    {interestOptions.map((option) => {
+                        const active = interests.includes(option);
+                        return (
+                            <TouchableOpacity
+                                key={option}
+                                className={`px-4 py-2 rounded-full border ${
+                                    active ? 'bg-blue-50 border-blue-500' : 'border-gray-300'
+                                }`}
+                                onPress={() =>
+                                    setInterests((prev) =>
+                                        prev.includes(option)
+                                            ? prev.filter((i) => i !== option)
+                                            : [...prev, option]
+                                    )
+                                }
+                            >
+                                <Text className={`${active ? 'text-blue-600' : 'text-gray-700'}`}>
+                                    {option}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+
+                <Text className="text-gray-700 text-base font-semibold mb-2">Preferred Day Hours</Text>
+                <View className="flex-row gap-3 mb-4">
+                    <View className="flex-1">
+                        <Text className="text-gray-500 text-sm mb-1">Start Hour (0-23)</Text>
+                        <TextInput
+                            className="w-full bg-white border border-gray-300 rounded-xl p-3 text-base text-gray-900"
+                            keyboardType="number-pad"
+                            value={preferredStartHour}
+                            onChangeText={setPreferredStartHour}
+                        />
+                    </View>
+                    <View className="flex-1">
+                        <Text className="text-gray-500 text-sm mb-1">End Hour (0-23)</Text>
+                        <TextInput
+                            className="w-full bg-white border border-gray-300 rounded-xl p-3 text-base text-gray-900"
+                            keyboardType="number-pad"
+                            value={preferredEndHour}
+                            onChangeText={setPreferredEndHour}
+                        />
+                    </View>
+                </View>
+
+                <TouchableOpacity
+                    className="flex-row items-center gap-3"
+                    onPress={() => setAllowSameDayCityTravel((prev) => !prev)}
+                >
+                    <Ionicons
+                        name={allowSameDayCityTravel ? 'checkbox' : 'square-outline'}
+                        size={24}
+                        color={allowSameDayCityTravel ? '#2563eb' : '#6b7280'}
+                    />
+                    <Text className="text-gray-700">Allow same-day city travel</Text>
+                </TouchableOpacity>
+            </View>
+
             {/* Navigation Buttons */}
-            <View className="flex-row justify-between">
+            <View className="flex-row justify-between mb-6">
                 <TouchableOpacity
                     className="w-[48%] h-14 border-gray-200 border bg-transparent rounded-2xl flex-row items-center justify-center"
                     onPress={() => router.back()}
@@ -161,9 +265,10 @@ const CreateTripStep2: React.FC = () => {
                     <Text className="text-white text-lg font-semibold">Next</Text>
                 </TouchableOpacity>
             </View>
+        </ScrollView>
+
         </View>
     );
 };
 
 export default CreateTripStep2;
-
