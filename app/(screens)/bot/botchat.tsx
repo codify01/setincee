@@ -7,25 +7,68 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import AiIcon from "@/assets/icons/ai.svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import { createAiTrip } from "@/utils/axiosIntances";
 
 const TripAssistant = () => {
   const [travelPlan, setTravelPlan] = useState("");
   const [showItinerary, setShowItinerary] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [missingFieldValues, setMissingFieldValues] = useState<Record<string, string>>({});
+  const [tripResult, setTripResult] = useState<any | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleGenerateItinerary = () => {
-    // Handle itinerary generation
-    console.log("Generating itinerary for:", travelPlan);
-    setShowItinerary(true);
+  const buildPromptWithMissingFields = (basePrompt: string) => {
+    const extras = Object.entries(missingFieldValues)
+      .filter(([, v]) => v.trim().length > 0)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(", ");
+    if (!extras) return basePrompt;
+    return `${basePrompt}. Additional details: ${extras}.`;
+  };
+
+  const handleGenerateItinerary = async () => {
+    if (!travelPlan.trim()) return;
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const prompt = buildPromptWithMissingFields(travelPlan);
+      const response = await createAiTrip(prompt);
+      const payload = response?.data ?? {};
+      if (!payload.success) {
+        const fields = payload.importantFields || payload.missing || [];
+        setMissingFields(fields);
+        setShowItinerary(false);
+        return;
+      }
+      setTripResult(payload.data);
+      setMissingFields([]);
+      setShowItinerary(true);
+    } catch (err) {
+      setErrorMessage("Failed to generate itinerary. Please try again.");
+      console.log('====================================');
+      console.log(err.response);
+      console.log('====================================');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleExamplePress = (example) => {
     setTravelPlan(example);
+    setMissingFields([]);
+    setMissingFieldValues({});
   };
+
+  const missingFieldsLabel = useMemo(() => {
+    if (missingFields.length === 0) return null;
+    return `Please add: ${missingFields.join(", ")}`;
+  }, [missingFields]);
 
   // Sample itinerary data
   const sampleItinerary = {
@@ -119,8 +162,33 @@ const TripAssistant = () => {
                 <Ionicons name="mic" size={20} color="#9ca3af" />
               </View>
             </View>
+            {missingFieldsLabel && (
+              <View className="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-4">
+                <Text className="text-orange-700">{missingFieldsLabel}</Text>
+              </View>
+            )}
+            {missingFields.length > 0 && (
+              <View className="gap-3 mb-4">
+                {missingFields.map((field) => (
+                  <View key={field}>
+                    <Text className="text-gray-600 mb-2 capitalize">{field}</Text>
+                    <TextInput
+                      className="border border-gray-300 rounded-xl px-4 py-3 text-gray-900"
+                      placeholder={`Enter ${field}`}
+                      value={missingFieldValues[field] || ""}
+                      onChangeText={(val) =>
+                        setMissingFieldValues((prev) => ({ ...prev, [field]: val }))
+                      }
+                    />
+                  </View>
+                ))}
+              </View>
+            )}
+            {errorMessage && (
+              <Text className="text-red-500 mb-3">{errorMessage}</Text>
+            )}
             {/* Generate Button */}
-            <TouchableOpacity onPress={handleGenerateItinerary}>
+            <TouchableOpacity onPress={handleGenerateItinerary} disabled={isLoading}>
               <LinearGradient
                 colors={["#9810FA", "#155DFC"]}
                 start={{ x: 1, y: 0 }}
@@ -130,7 +198,7 @@ const TripAssistant = () => {
                 <View className="flex-row items-center gap-3">
                   <AiIcon width={30} height={25} />
                   <Text className="text-white text-xl font-bold">
-                    Generate Itinerary
+                    {isLoading ? "Generating..." : "Generate Itinerary"}
                   </Text>
                 </View>
               </LinearGradient>
@@ -212,13 +280,46 @@ const TripAssistant = () => {
                 </Text>
                 <View className="flex-row justify-between items-center">
                   <Text className="text-gray-700 text-lg">
-                    {sampleItinerary.title}
+                    {tripResult?.summary || sampleItinerary.title}
                   </Text>
                   <Text className="text-gray-500">
-                    {sampleItinerary.placesCount}
+                    {tripResult?.trips?.length
+                      ? `${tripResult.trips.length} trip(s)`
+                      : sampleItinerary.placesCount}
                   </Text>
                 </View>
               </View>
+
+              {Array.isArray(tripResult?.trips) && tripResult.trips.length > 0 && (
+                <View className="mb-6">
+                  {tripResult.trips.map((trip) => (
+                    <View
+                      key={trip.id}
+                      className="bg-white rounded-2xl p-4 mb-3 border border-gray-200"
+                    >
+                      <View className="flex-row items-center gap-3">
+                        <Image
+                          source={{
+                            uri:
+                              trip.image ||
+                              "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
+                          }}
+                          className="w-16 h-16 rounded-xl"
+                          resizeMode="cover"
+                        />
+                        <View className="flex-1">
+                          <Text className="text-lg font-semibold text-gray-900">
+                            {trip.name}
+                          </Text>
+                          <Text className="text-gray-600">
+                            {trip.destination} • {trip.duration}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
 
               {/* Itinerary Places */}
               <View className="space-y-6 mb-8">

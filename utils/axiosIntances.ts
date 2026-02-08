@@ -54,3 +54,6 @@ export const deleteItinerary = async (id:string) => AX.delete(`/api/itineraries/
 export const getCities = async () => AX.get('/api/cities')
 export const createTrip = async (data:object) => AX.post('/api/trips', data)
 export const getTripById = async (id:string) => AX.get(`/api/trips/${id}`)
+
+export const createAiTrip = async (prompt: string) =>
+  AX.post('/api/ai/trips', { prompt })
