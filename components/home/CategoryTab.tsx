@@ -18,7 +18,7 @@ const CategoryTab = ({
     <TouchableOpacity
       onPress={onPress}
       className={`
-        px-5 py-4 gap-4 rounded-3xl my-4 flex-row items-center justify-center mr-3
+        px-5 py-4 gap-4 rounded-full my-4 flex-row items-center justify-center mr-3
       `}
       style={[
         {
