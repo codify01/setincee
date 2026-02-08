@@ -1,17 +1,26 @@
 import React from 'react';
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
-import { Place } from '@/app/(screens)/PlaceDetailsScreen/[id]';
 
 interface Props {
-  places: Place[];
+  places: {
+    _id: string;
+    name: string;
+    description: string;
+    rating?: number;
+    images: string[];
+  }[];
 }
 
 const RecommendedList: React.FC<Props> = ({ places }) => {
-  const renderItem = ({ item }: { item: Place }) => (
+  const renderItem = ({ item }: { item: Props['places'][number] }) => (
     <TouchableOpacity className="mr-4 w-56 rounded-xl bg-white p-3 border border-gray-200 active:opacity-80"
-      onPress={() => router.push(`/(screens)/PlaceDetailsScreen/${item._id}`)}>
-      <Image source={{uri:item.images[0]}} className="w-full h-32 rounded-xl mb-3" resizeMode="cover" />
+      onPress={() => router.push(`/place/${item._id}`)}>
+      <Image
+        source={item.images?.[0] ? { uri: item.images[0] } : require('@/assets/images/splash/page1.png')}
+        className="w-full h-32 rounded-xl mb-3"
+        resizeMode="cover"
+      />
       <Text className="font-semibold text-lg text-gray-800 line-clamp-1">{item.name}</Text>
       <Text className="text-yellow-500 font-semibold mb-1">⭐ {item.rating || 4.5} </Text>
       <Text className="text-grey text-sm line-clamp-2">{item.description}</Text>

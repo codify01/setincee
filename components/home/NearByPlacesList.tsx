@@ -7,6 +7,7 @@ interface NearbyPlace {
   name: string;
   distance: string;
   image: any;
+  rating?: number;
 }
 
 interface Props {
@@ -17,14 +18,14 @@ const NearbyPlacesList: React.FC<Props> = ({ data }) => {
   const renderItem = ({ item }: { item: NearbyPlace }) => (
     <TouchableOpacity className="mr-4 w-48 bg-white overflow-hidden active:opacity-80">
      <View className='rounded-2xl overflow-hidden'>
-       <ImageBackground source={item.image} className="w-full h-52 " >
+       <ImageBackground source={typeof item.image === 'string' ? { uri: item.image } : item.image} className="w-full h-52 " >
         <View className='bg-white w-16 h-8 rounded-full top-2 right-2 absolute flex-row items-center justify-center gap-1 px-2'>
           <Ionicons name='star'/>
-          <Text>4.8</Text>
+          <Text>{item.rating ?? 4.8}</Text>
         </View>
          <View className='rounded-full bottom-2 left-0 absolute flex-row items-center justify-center gap-1 px-2'>
           <Ionicons name='location-outline' color={'white'} size={20}/>
-          <Text className='text-white text-xl'>4.8 km</Text>
+          <Text className='text-white text-xl'>{item.distance}</Text>
         </View>
       </ImageBackground>
      </View>

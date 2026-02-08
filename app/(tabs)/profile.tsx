@@ -10,9 +10,12 @@ import {
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
+import ProfileSkeleton from '@/components/skeletons/ProfileSkeleton';
+import { useProfileTabData } from '@/hooks/useProfileTabData';
 
 const ProfileTab = () => {
 	const { user, logout } = useAuth();
+	const { data, loading } = useProfileTabData();
 
 	const handleLogOut = async () => {
 		try {
@@ -24,16 +27,24 @@ const ProfileTab = () => {
 		}
 	}
 
+	if (loading) {
+		return <ProfileSkeleton />;
+	}
+
+	const profileUser = data?.user || user;
+	const fullName = [profileUser?.lastName, profileUser?.firstName].filter(Boolean).join(' ') || 'Guest';
+	const activity = data?.activity;
+
 	return (
 		<ScrollView className="flex-1 bg-sec px-5 pt-6">
 			{/* Header */}
 			<View className="items-center mb-6">
 				<Image
-					source={{uri:"https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/ecommerce/car-interior-design.jpg"}}
+					source={{uri: profileUser?.avatar || "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/ecommerce/car-interior-design.jpg"}}
 					className="w-24 h-24 rounded-full mb-3"
 				/>
-				<Text className="text-2xl font-semibold text-pry">{user?.lastName + ' ' + user?.firstName}</Text>
-				<Text className="text-gray-500 text-sm">{user?.username}</Text>
+				<Text className="text-2xl font-semibold text-pry">{fullName}</Text>
+				<Text className="text-gray-500 text-sm">{profileUser?.username}</Text>
 			</View>
 
 			{/* Profile Actions */}
@@ -68,15 +79,15 @@ const ProfileTab = () => {
 				<Text className="text-pry font-semibold text-lg mb-4">My Activity</Text>
 				<View className="flex-row justify-between mb-3">
 					<Text className="text-gray-600">Trips Created</Text>
-					<Text className="font-semibold text-pry">12</Text>
+					<Text className="font-semibold text-pry">{activity?.tripsCreated ?? 0}</Text>
 				</View>
 				<View className="flex-row justify-between mb-3">
 					<Text className="text-gray-600">Places Visited</Text>
-					<Text className="font-semibold text-pry">28</Text>
+					<Text className="font-semibold text-pry">{activity?.placesVisited ?? 0}</Text>
 				</View>
 				<View className="flex-row justify-between">
 					<Text className="text-gray-600">Favorites</Text>
-					<Text className="font-semibold text-pry">7</Text>
+					<Text className="font-semibold text-pry">{activity?.favorites ?? 0}</Text>
 				</View>
 			</View>
 

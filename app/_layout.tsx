@@ -94,8 +94,8 @@ function RootLayoutNav({ hasSeenOnboarding }: { hasSeenOnboarding: boolean }) {
       <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack initialRouteName={hasSeenOnboarding ? '(auth)' : '(onboarding)'}>
          <StatusBar style="auto" />
-        <Stack.Screen name='(onboarding)' options={{headerShown:false}}/>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name='(onboarding)' options={{headerShown:false}}/>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(screens)" options={{ headerShown: false }} />
         <Stack.Screen name="(modals)" options={{ presentation: 'modal', headerShown:false }} />

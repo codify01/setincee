@@ -17,7 +17,7 @@ const TrendingList: React.FC<Props> = ({ data }) => {
 		<View>
 			<Text className="text-2xl font-medium mb-4">Trending Now</Text>
 			<FlatList
-				data={data.reverse()}
+				data={data.slice().reverse()}
 				horizontal
 				keyExtractor={(item) => item.id}
 				renderItem={({ item }) => (

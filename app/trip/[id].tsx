@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,12 @@ import {
   Dimensions,
   Modal,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams, Tabs } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { getTripById } from "@/utils/axiosIntances";
 
 const { width } = Dimensions.get("window");
 
@@ -46,82 +48,6 @@ interface TodoItem {
   completed: boolean;
 }
 
-const mockItinerary: DayPlan[] = [
-  {
-    date: "Wednesday, Jan 1",
-    activities: [
-      {
-        id: "a1",
-        name: "Jollof Junction",
-        type: "Nigerian Cuisine",
-        time: "10:00 AM",
-      },
-      {
-        id: "a2",
-        name: "Nike Art Gallery",
-        type: "Art & Culture",
-        time: "2:00 PM",
-      },
-    ],
-  },
-  {
-    date: "Thursday, Jan 2",
-    activities: [
-      {
-        id: "a3",
-        name: "Visit local markets",
-        type: "Explore traditional Nigerian markets",
-        time: "10:00 AM",
-      },
-      {
-        id: "a4",
-        name: "Beach sunset picnic",
-        type: "Watch sunset at Elegushi Beach",
-        time: "6:00 PM",
-      },
-    ],
-  },
-  {
-    date: "Friday, Jan 3",
-    activities: [], // No plans for this day
-  },
-  {
-    date: "Friday, Jan 4",
-    activities: [], // No plans for this day
-  },
-  {
-    date: "Friday, Jan 5",
-    activities: [], // No plans for this day
-  },
-  {
-    date: "Friday, Jan 6",
-    activities: [], // No plans for this day
-  },
-];
-
-const mockPlaces: Place[] = [
-  {
-    id: "p1",
-    name: "Jolof Junction",
-    type: "Nigerian Cuisine",
-    rating: 4.8,
-    time: "10:00 AM",
-    day: 1,
-    image:
-      "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
-  },
-  {
-    id: "p2",
-    name: "Nike Art Gallery",
-    type: "Art & Culture",
-    rating: 4.1,
-    time: "2:00 PM",
-    day: 2,
-    image:
-      "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135844/samples/balloons.jpg",
-  },
-];
-
 const mockTodoItems: TodoItem[] = [
   {
     id: "t1",
@@ -141,16 +67,135 @@ const mockTodoItems: TodoItem[] = [
   },
 ];
 
-const TripOverview: React.FC = () => {
-  const {
-    tripName,
+interface TripDetails {
+  id: string;
+  name: string;
+  destination: string;
+  startDate: string;
+  endDate: string;
+  travelers: number;
+  image: string;
+  placesAdded: number;
+  activities: number;
+  completed: number;
+}
+
+const formatDate = (value?: string) => {
+  if (!value) return "";
+  const date = new Date(value);
+  return date.toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+const computeDurationDays = (start?: string, end?: string) => {
+  if (!start || !end) return "";
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const diffMs = endDate.getTime() - startDate.getTime();
+  if (Number.isNaN(diffMs) || diffMs < 0) return "";
+  const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24)) + 1;
+  return `${days} days`;
+};
+
+const normalizeTrip = (raw: any) => {
+  const source = raw?.trip || raw?.data || raw;
+  if (!source) return null;
+
+  const name = source.title || source.name || "Trip";
+  const destination =
+    source.destination?.name ||
+    source.destination ||
+    source.cities?.[0]?.name ||
+    "Unknown";
+  const startDate = source.startDate || source.start || source.dateStart;
+  const endDate = source.endDate || source.end || source.dateEnd;
+  const travelers =
+    Number(source.travelers || source.travelersCount || source.preferences?.travelers) || 1;
+  const image =
+    source.image ||
+    source.coverImage ||
+    source.thumbnail ||
+    source.places?.[0]?.images?.[0] ||
+    "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg";
+
+  const days = source.itinerary?.days || source.days || [];
+  const dayPlans: DayPlan[] = [];
+  const places: Place[] = [];
+  let activitiesCount = 0;
+  let completedCount = 0;
+
+  if (Array.isArray(days)) {
+    days.forEach((day: any, dayIndex: number) => {
+      const dayNumber = day.day ?? day.dayNumber ?? dayIndex + 1;
+      const dateLabel = day.date || day.dayDate || `Day ${dayNumber}`;
+      const blocks = day.blocks || day.items || day.activities || [];
+      const activities: Activity[] = [];
+
+      if (Array.isArray(blocks)) {
+        blocks.forEach((block: any, blockIndex: number) => {
+          const placeObj = block.place || block.location || block;
+          const name = placeObj?.name || block.title || block.name;
+          if (!name) return;
+          const type = placeObj?.category || placeObj?.type || block.type || "Activity";
+          const time = block.time || block.startTime || block.start || "Time TBD";
+          const rating = Number(placeObj?.rating || placeObj?.averageRating || 0);
+          const image =
+            placeObj?.images?.[0] ||
+            placeObj?.image ||
+            "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg";
+
+          activities.push({
+            id: block._id || placeObj?._id || `${dayIndex}-${blockIndex}`,
+            name,
+            type,
+            time,
+          });
+
+          places.push({
+            id: placeObj?._id || block.placeId || `${dayIndex}-${blockIndex}`,
+            name,
+            type,
+            rating: rating || 0,
+            time,
+            image,
+            day: dayNumber,
+          });
+
+          if (block.completed || block.visited) completedCount += 1;
+        });
+      }
+
+      activitiesCount += activities.length;
+      dayPlans.push({ date: dateLabel, activities });
+    });
+  }
+
+  const tripDetails: TripDetails = {
+    id: source._id || source.id || "trip",
+    name,
     destination,
-    startDate,
-    endDate,
+    startDate: formatDate(startDate),
+    endDate: formatDate(endDate),
     travelers,
-    description,
-    tripType,
-  } = useLocalSearchParams();
+    image,
+    placesAdded: places.length,
+    activities: activitiesCount,
+    completed: completedCount,
+  };
+
+  return {
+    tripDetails,
+    dayPlans,
+    places,
+    duration: computeDurationDays(startDate, endDate),
+  };
+};
+
+const TripOverview: React.FC = () => {
+  const { id } = useLocalSearchParams<{ id: string }>();
 
   const [activeTab, setActiveTab] = useState("Overview"); // Default active tab
   const [showAddActivityModal, setShowAddActivityModal] = useState(false);
@@ -164,32 +209,38 @@ const TripOverview: React.FC = () => {
     useState(false);
   const [todoItems, setTodoItems] = useState<TodoItem[]>(mockTodoItems);
 
-  const mockTripDetails = {
-    id: "1",
-    name: tripName || "Summer Vacation",
-    destination: destination || "Cape Town, South Africa",
-    startDate: startDate
-      ? new Date(startDate as string).toLocaleDateString("en-US", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
-      : "02/02/2026",
-    endDate: endDate
-      ? new Date(endDate as string).toLocaleDateString("en-US", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
-      : "02/17/2026",
-    duration: "15 days",
-    travelers: travelers || 1,
-    image:
-      "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
-    placesAdded: 2,
-    activities: 2,
-    completed: 0,
-  };
+  const [tripDetails, setTripDetails] = useState<TripDetails | null>(null);
+  const [itineraryDays, setItineraryDays] = useState<DayPlan[]>([]);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [duration, setDuration] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTrip = async () => {
+      if (!id) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getTripById(id);
+        const payload = response?.data?.data ?? response?.data;
+        const normalized = normalizeTrip(payload);
+        if (normalized) {
+          setTripDetails(normalized.tripDetails);
+          setItineraryDays(normalized.dayPlans);
+          setPlaces(normalized.places);
+          setDuration(normalized.duration);
+        } else {
+          setError("Trip not found.");
+        }
+      } catch (e) {
+        setError("Failed to load trip details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTrip();
+  }, [id]);
 
   const renderItineraryActivity = (activity: Activity) => (
     <View
@@ -325,21 +376,21 @@ const TripOverview: React.FC = () => {
               <View className="">
                 <View className="text-gray-700 text-base mb-2 flex-row justify-between">
                   <Text className="font-semibold">Start Date:</Text>
-                  <Text>{mockTripDetails.startDate}</Text>
+                  <Text>{tripDetails?.startDate || "-"}</Text>
                 </View>
                 <View className="text-gray-700 text-base mb-2 flex-row justify-between">
                   <Text className="font-semibold">End Date:</Text>
-                  <Text>{mockTripDetails.endDate}</Text>
+                  <Text>{tripDetails?.endDate || "-"}</Text>
                 </View>
                 <View className="text-gray-700 text-base mb-2 flex-row justify-between">
                   <Text className="font-semibold">Duration:</Text>
-                  <Text>{mockTripDetails.duration}</Text>
+                  <Text>{duration || "-"}</Text>
                 </View>
                 <View className="text-gray-700 text-base mb-2 flex-row justify-between">
                   <Text className="font-semibold">Travelers:</Text>
                   <Text>
-                    {mockTripDetails.travelers} person
-                    {Number(mockTripDetails.travelers) > 1 ? "s" : ""}
+                    {tripDetails?.travelers || 1} person
+                    {Number(tripDetails?.travelers || 1) > 1 ? "s" : ""}
                   </Text>
                 </View>
               </View>
@@ -354,13 +405,13 @@ const TripOverview: React.FC = () => {
                 <View className="flex-col mb-2 h-28 w-44 bg-white rounded-md p-3">
                   <Text className="text-gray-500 text-md">Places Added</Text>
                   <Text className="text-black text-2xl font-semibold">
-                    {mockTripDetails.placesAdded}
+                    {tripDetails?.placesAdded || 0}
                   </Text>
                 </View>
                 <View className="flex-col mb-2 h-28 w-44 bg-white rounded-md p-3">
                   <Text className="text-gray-500 text-md">Activities</Text>
                   <Text className="text-black text-2xl font-semibold">
-                    {mockTripDetails.activities}
+                    {tripDetails?.activities || 0}
                   </Text>
                 </View>
               </View>
@@ -369,13 +420,13 @@ const TripOverview: React.FC = () => {
                 <View className="flex-col mb-2 h-28 w-44 bg-white rounded-md p-3">
                   <Text className="text-gray-500 text-md">Completed</Text>
                   <Text className="text-black text-2xl font-semibold">
-                    {mockTripDetails.completed}
+                    {tripDetails?.completed || 0}
                   </Text>
                 </View>
                 <View className="flex-col mb-2 h-28 w-44 bg-white rounded-md p-3">
                   <Text className="text-gray-500 text-md">Remaining</Text>
                   <Text className="text-black text-2xl font-semibold">
-                    {mockTripDetails.completed}
+                    {Math.max((tripDetails?.activities || 0) - (tripDetails?.completed || 0), 0)}
                   </Text>
                 </View>
               </View>
@@ -391,10 +442,10 @@ const TripOverview: React.FC = () => {
             <View className="flex-row justify-between mb-4">
               <Text className="text-xl text-gray-900 ">Day-by-Day Plan </Text>
               <Text className="text-gray-500 text-md">
-                {mockItinerary.length} days total
+                {itineraryDays.length} days total
               </Text>
             </View>
-            {mockItinerary.map((day, index) => (
+            {itineraryDays.map((day, index) => (
               <View key={index} className="mb-6">
                 <View className="bg-[#F8FAFC] p-4 rounded-xl">
                   <View className="flex-row justify-between">
@@ -443,7 +494,7 @@ const TripOverview: React.FC = () => {
                 <Text className="text-white font-semibold ml-1">Add Place</Text>
               </TouchableOpacity>
             </View>
-            {mockPlaces.map(renderPlaceItem)}
+            {places.map(renderPlaceItem)}
           </ScrollView>
         );
       case "To-Do":
@@ -670,13 +721,30 @@ const TripOverview: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#155DFC" />
+        <Text className="mt-3 text-gray-500">Loading trip...</Text>
+      </View>
+    );
+  }
+
+  if (error || !tripDetails) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <Text className="text-gray-500">{error || "Trip not found."}</Text>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-white">
       {/* Header Image */}
       <View className="w-full h-96 relative">
         <Image
           source={{
-            uri: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
+            uri: tripDetails.image,
           }}
           alt="hero image"
           className="w-full h-96 absolute top-0 "
@@ -707,31 +775,31 @@ const TripOverview: React.FC = () => {
       <View className="rounded-t-3xl -mt-20 flex-1">
         <View className="px-2 pb-4">
           <Text className="text-2xl font-bold text-white mb-1">
-            {mockTripDetails.name}
+            {tripDetails.name}
           </Text>
           <Text className=" text-base text-white mb-4">
-            {mockTripDetails.destination}
+            {tripDetails.destination}
           </Text>
           <View className="flex-row items-center gap-3 relative  bottom-4 justify-around">
             <View className="items-start leading-4 bg-white h-20 w-32 rounded-xl justify-center p-2 shadow-sm ">
               <Ionicons name="calendar-outline" size={20} color="#155DFC" />
               <Text className="text-gray-500 text-sm">Duration</Text>
               <Text className="text-gray-900 text-sm">
-                {mockTripDetails.duration}
+                {duration}
               </Text>
             </View>
             <View className="items-start bg-white h-20 w-32 rounded-xl justify-center p-2 shadow-sm ">
               <Ionicons name="person-outline" size={20} color="#155DFC" />
               <Text className="text-gray-500 text-sm">Traveler</Text>
               <Text className="text-gray-900 text-sm">
-                {mockTripDetails.travelers}
+                {tripDetails.travelers}
               </Text>
             </View>
             <View className="items-start bg-white h-20 w-32 rounded-xl justify-center p-2 shadow-sm ">
               <Ionicons name="map-outline" size={20} color="#155DFC" />
               <Text className="text-gray-500 text-sm">Places</Text>
               <Text className="text-gray-900 text-sm">
-                {mockTripDetails.placesAdded}{" "}
+                {tripDetails.placesAdded}{" "}
               </Text>
             </View>
           </View>

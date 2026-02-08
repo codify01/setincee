@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Image, StatusBar } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StatusBar, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { getCities } from '@/utils/axiosIntances';
 
 const tripTypes = [
     { name: 'Family', icon: 'people-outline' },
@@ -12,24 +13,59 @@ const tripTypes = [
     { name: 'Work', icon: 'briefcase-outline' },
 ];
 
+interface CityItem {
+    _id: string;
+    name: string;
+}
+
 const CreateTrip: React.FC = () => {
     const [tripName, setTripName] = useState('');
     const [destination, setDestination] = useState('');
     const [selectedTripType, setSelectedTripType] = useState<string | null>(null);
     const [isDestinationFocused, setIsDestinationFocused] = useState(false);
+    const [cities, setCities] = useState<CityItem[]>([]);
+    const [loadingCities, setLoadingCities] = useState(false);
+    const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            setLoadingCities(true);
+            try {
+                const response = await getCities();
+                const payload = response?.data?.data ?? response?.data;
+                const list =
+                    (Array.isArray(payload) && payload) ||
+                    (Array.isArray(payload?.cities) && payload.cities) ||
+                    (Array.isArray(payload?.data) && payload.data) ||
+                    (Array.isArray(payload?.data?.cities) && payload.data.cities) ||
+                    [];
+                setCities(list);
+            } catch {
+                // best effort; keep local suggestions
+            } finally {
+                setLoadingCities(false);
+            }
+        };
+        fetchCities();
+    }, []);
 
     const handleNext = () => {
         // Basic validation
-        if (!tripName.trim() || !destination.trim() || !selectedTripType) {
+        if (!tripName.trim() || !destination.trim() || !selectedTripType || !selectedCityId) {
             alert('Please fill in all fields and select a trip type.');
             return;
         }
 
         router.push({
             pathname: '/create-trip/step-2',
-            params: { tripName, destination, tripType: selectedTripType },
+            params: { tripName, destination, tripType: selectedTripType, cityId: selectedCityId },
         });
     };
+
+    const filteredCities = destination.trim().length
+        ? cities.filter((c) => c.name.toLowerCase().includes(destination.toLowerCase()))
+        : cities;
+    const showCityList = isDestinationFocused || destination.trim().length > 0;
 
     return (
             <View className="flex-1 bg-white pt-12 px-5">
@@ -50,7 +86,7 @@ const CreateTrip: React.FC = () => {
                 <View className="w-1/3 h-full bg-blue-600 rounded-full" />
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 <Text className="text-xl text-gray-800 mb-3">Let's start with the basics</Text>
                
 
@@ -74,25 +110,45 @@ const CreateTrip: React.FC = () => {
                         placeholder="Where are you going?"
                         placeholderTextColor="#9ca3af"
                         value={destination}
-                        onChangeText={setDestination}
+                        onChangeText={(text) => {
+                            setDestination(text);
+                            setSelectedCityId(null);
+                        }}
                         onFocus={() => setIsDestinationFocused(true)}
-                        onBlur={() => setIsDestinationFocused(false)}
+                        onBlur={() => {
+                            // keep list open while typing; close only on selection
+                        }}
                     />
-                    {isDestinationFocused && (
+                    {showCityList && (
                         <View className="mt-4 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                            <Text className="text-gray-700  mb-4">Popular Destinations</Text>
+                            <Text className="text-gray-700  mb-4">Select a city</Text>
                             <View className="flex-col flex-wrap">
-                                {['Lagos, Nigeria', 'Abuja, Nigeria', 'Nairobi, Kenya', 'Accra, Ghana', 'Marrakech, Morocco'].map((city, index) => (
+                                {loadingCities && (
+                                    <View className="py-2">
+                                        <ActivityIndicator size="small" color="#1f2937" />
+                                    </View>
+                                )}
+                                {!loadingCities && filteredCities.length === 0 && (
+                                    <Text className="text-gray-500">No matching cities.</Text>
+                                )}
+                                {!loadingCities && filteredCities.map((city) => (
                                     <TouchableOpacity
-                                        key={index}
-                                        className="rounded-full px-4 py-2 mr-2 mb-2"
-                                        onPress={() => setDestination(city)}
+                                        key={city._id}
+                                        className="rounded-full px-4 py-2 mr-2 mb-2 w-full"
+                                        onPress={() => {
+                                            setDestination(city.name);
+                                            setSelectedCityId(city._id);
+                                            setIsDestinationFocused(false);
+                                        }}
                                     >
-                                        <Text className="text-black text-md">{city}</Text>
+                                        <Text className="text-black text-md">{city.name}</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
                         </View>
+                    )}
+                    {!selectedCityId && destination.trim().length > 0 && (
+                        <Text className="text-red-500 text-sm mt-2">Please select a city from the list.</Text>
                     )}
                 </View>
 
@@ -125,10 +181,10 @@ const CreateTrip: React.FC = () => {
                 {/* Next Button */}
                 <TouchableOpacity
                     className={`w-full h-14 rounded-full flex-row items-center justify-center mb-6 ${
-                        !tripName.trim() || !destination.trim() || !selectedTripType ? 'bg-blue-500' : 'bg-blue-600'
+                        !tripName.trim() || !destination.trim() || !selectedTripType || !selectedCityId ? 'bg-blue-500' : 'bg-blue-600'
                     }`}
                     onPress={handleNext}
-                    disabled={!tripName.trim() || !destination.trim() || !selectedTripType}
+                    disabled={!tripName.trim() || !destination.trim() || !selectedTripType || !selectedCityId}
                 >
                     <Text className="text-white text-lg font-semibold">Next</Text>
                 </TouchableOpacity>
@@ -138,4 +194,3 @@ const CreateTrip: React.FC = () => {
 };
 
 export default CreateTrip;
-

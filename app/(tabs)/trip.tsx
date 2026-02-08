@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList, RefreshControl, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AiIcon from '../../assets/icons/ai.svg';
 import { router } from 'expo-router';
+import TripsSkeleton from '@/components/skeletons/TripsSkeleton';
+import { useTripsTabData } from '@/hooks/useTripsTabData';
 
 interface Trip {
     id: string;
@@ -14,25 +16,6 @@ interface Trip {
     image: string;
 }
 
-const mockTrips: Trip[] = [
-    {
-        id: '1',
-        name: 'Summer Vacation',
-        destination: 'Cape Town, South Africa',
-        duration: '15 Days',
-        travelers: 1,
-        image: 'https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg',
-    },
-    {
-        id: '2',
-        name: 'Winter Getaway',
-        destination: 'New York City, USA',
-        duration: '7 Days',
-        travelers: 2,
-        image: 'https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135844/samples/balloons.jpg',
-    },
-];
-
 const styles = StyleSheet.create({
     gradientButton: {
         flexDirection: 'row',
@@ -42,8 +25,33 @@ const styles = StyleSheet.create({
     },
 });
 
+//  const mockTrips: Trip[] = [
+//     {
+//         id: '1',
+//         name: 'Summer Vacation',
+//         destination: 'Cape Town, South Africa',
+//         duration: '15 Days',
+//         travelers: 1,
+//         image: 'https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg',
+//     },
+//     {
+//         id: '2',
+//         name: 'Winter Getaway',
+//         destination: 'New York City, USA',
+//         duration: '7 Days',
+//         travelers: 2,
+//         image: 'https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135844/samples/balloons.jpg',
+//     },
+// ];
+
 const Trips: React.FC = () => {
-    const hasTrips = mockTrips.length > 0; 
+    const { data, loading, refreshing, refresh } = useTripsTabData();
+    // console.log('Trips data:', data);
+    
+    const trips: Trip[] = Array.isArray(data?.trips) && data.trips.length > 0 ? data.trips : []; // Use mock data if API data is not available
+    const hasTrips = trips.length > 0; 
+
+   
 
     const renderTripCard = ({ item }: { item: Trip }) => (
         <TouchableOpacity
@@ -70,7 +78,9 @@ const Trips: React.FC = () => {
                     </View>
                 </View>
                 <View className='flex-row justify-between mt-4 items-center border-t border-gray-300 pt-3'>
-                <Text className='font-thin text-gray-900'>2 place added</Text>
+                <Text className='font-thin text-gray-900'>
+                    {(item.placesCount ?? 0)} {(item.placesCount ?? 0) === 1 ? 'place added' : 'places added'}
+                </Text>
                 <TouchableOpacity 
                     className=" py-2 px-4 rounded-full items-center"
                     onPress={() => router.push(`/trip/${item.id}`)}
@@ -83,6 +93,10 @@ const Trips: React.FC = () => {
         </TouchableOpacity>
     );
 
+    if (loading) {
+        return <TripsSkeleton />;
+    }
+
     if (hasTrips) {
         return (
             <View className="flex-1 pt-12 px-5">
@@ -94,11 +108,14 @@ const Trips: React.FC = () => {
 
                 {/* Trips List */}
                 <FlatList
-                    data={mockTrips}
+                    data={trips}
                     renderItem={renderTripCard}
                     keyExtractor={(item) => item.id}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 80 }}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+                    }
                 />
 
                 {/* Floating Action Button */}
@@ -112,7 +129,11 @@ const Trips: React.FC = () => {
         );
     } else {
         return (
-            <View className="flex-1 pt-16 px-5">
+            <ScrollView
+                className="flex-1"
+                contentContainerStyle={{ paddingTop: 64, paddingHorizontal: 20, paddingBottom: 40 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
+            >
                 {/* Header */}
                 <View className="mb-8 border-b border-gray-200 pb-4 pt-10">
                     <Text className="text-4xl text-gray-900">My Trips</Text>
@@ -151,7 +172,7 @@ const Trips: React.FC = () => {
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </ScrollView>
         );
     }
 };

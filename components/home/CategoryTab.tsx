@@ -29,7 +29,7 @@ const CategoryTab = ({
     >
       {showImage && imageSource && (
         <Image
-          source={imageSource}
+          source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource}
           style={{ 
             width: imageSize, 
             height: imageSize,

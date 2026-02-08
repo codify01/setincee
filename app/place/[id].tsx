@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { getPlaceById } from '@/utils/axiosIntances';
 
 // Mock data for the specific restaurant
 const restaurantData = {
@@ -78,8 +79,26 @@ const PlaceDetailsScreen: React.FC = () => {
     const [visitDate, setVisitDate] = useState('');
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [userRating, setUserRating] = useState(0);
+    const [place, setPlace] = useState<any>(null);
+
+    useEffect(()=>{
+            const fetchPlaceDetails = async () =>{
+                try {
+                    const response = await getPlaceById(id as string);
+                    if (!response || !response.data || !response.data.data) {
+                        throw new Error('Invalid response structure');
+                    }
+                    const data = response.data.data;
+                    setPlace(data);
+                } catch (error) {
+                    console.error('Error fetching place details:', error);
+                }
+            }
+            fetchPlaceDetails();
+        },[id, place])
 
     const tabs = ['Overview', 'Reviews', 'Photos'];
+    
 
     const renderStars = (rating: number) => {
         return (
@@ -133,7 +152,7 @@ const PlaceDetailsScreen: React.FC = () => {
             {/* About Section */}
             <View className="mb-8">
                 <Text className="text-xl font-bold text-gray-900 my-3">About</Text>
-                <Text className="text-gray-700 leading-6">{restaurantData.about}</Text>
+                <Text className="text-gray-700 leading-6">{place?.description}</Text>
             </View>
 
             {/* Amenities Section */}
@@ -151,7 +170,7 @@ const PlaceDetailsScreen: React.FC = () => {
             {/* Location */}
             <View className="mb-8">
                 <Text className="text-xl font-bold text-gray-900 mb-3">Location</Text>
-                <Text className="text-gray-700 mb-2">{restaurantData.address}</Text>
+                <Text className="text-gray-700 mb-2">{place?.address}</Text>
                 <TouchableOpacity className="flex-row items-center">
                     <Ionicons name="map-outline" size={18} color="#3b82f6" style={{ marginRight: 6 }} />
                     <Text className="text-blue-500 font-medium">Map View</Text>
@@ -164,11 +183,11 @@ const PlaceDetailsScreen: React.FC = () => {
                     <Text className="text-black font-semibold text-start">Contact</Text>
                     <View className='flex-row gap-3'>
                     <Ionicons name="call-outline" size={20} color="#000" className=''  />
-                    <Text className="text-black  text-start">+234 123 456 7890</Text>
+                    <Text className="text-black  text-start">{place?.contactInfo?.phone}</Text>
                     </View>
                     <View className='flex-row gap-3'>
                      <Ionicons name="time-outline" size={20} color="#000" className='' />
-                    <Text className="text-black  text-start">10:00 AM - 10:00 PM</Text>
+                    <Text className="text-black  text-start">{place?.openingHours}</Text>
                     </View>
             </View>
             <View className="flex-row gap-3 my-8">
@@ -423,7 +442,7 @@ const PlaceDetailsScreen: React.FC = () => {
                 {/* Hero Image with Overlay Content */}
                 <View className="w-full h-96 bg-gray-200 overflow-hidden relative">
                     <Image
-                        source={{ uri: restaurantData.image }}
+                        source={{ uri: place?.images?.[0] }}
                         className="w-full h-full"
                         resizeMode="cover"
                     />
@@ -453,8 +472,8 @@ const PlaceDetailsScreen: React.FC = () => {
 
                     {/* Restaurant Name and Type Overlay */}
                     <View className="absolute bottom-0 left-0 right-0 px-5 pb-6 z-10">
-                        <Text className="text-3xl font-bold text-white mb-2">{restaurantData.name}</Text>
-                        <Text className="text-white/90">{restaurantData.type}</Text>
+                        <Text className="text-3xl font-bold text-white mb-2">{place?.name}</Text>
+                        <Text className="text-white/90">{place?.category}</Text>
                     </View>
                 </View>
         {/* Rating and Distance */}
@@ -493,7 +512,7 @@ const PlaceDetailsScreen: React.FC = () => {
              <Text className="text-gray-700 text-center font-medium py-2">Price</Text>
              
              
-                        <Text className="text-blue-600 text-center font-medium text-sm">--</Text>
+                        <Text className="text-blue-600 text-center font-medium text-sm">{place?.entryFee.split(",").join("\n")}</Text>
              
            
             </View>
@@ -570,14 +589,14 @@ const PlaceDetailsScreen: React.FC = () => {
     <View className="px-3 py-4">
         <Text className="text-xl font-bold text-gray-900 mb-4 px-2">Photos</Text>
         <View className="flex-row flex-wrap justify-between">
-            {Array.from({ length: 9 }).map((_, index) => (
+            {place?.images?.map((image, index) => (
                 <TouchableOpacity 
                     key={index} 
                     className="w-[48%] mb-3 bg-gray-100 rounded-lg overflow-hidden aspect-square"
                     activeOpacity={0.8}
                 >
                     <Image
-                        source={{ uri: restaurantData.image }}
+                        source={{ uri: image }}
                         className="w-full h-full"
                         resizeMode="cover"
                     />
