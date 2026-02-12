@@ -1,117 +1,287 @@
-import React from 'react';
+import React from "react";
 import {
-	View,
-	Text,
-	TouchableOpacity,
-	Image,
-	ScrollView,
-	Alert,
-} from 'react-native';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useAuth } from '@/context/AuthContext';
-import ProfileSkeleton from '@/components/skeletons/ProfileSkeleton';
-import { useProfileTabData } from '@/hooks/useProfileTabData';
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Alert,
+  StyleSheet,
+} from "react-native";
+import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useAuth } from "@/context/AuthContext";
+import ProfileMenuItem from "@/components/profile/ProfileMenuItem";
+import ProfileSection from "@/components/profile/ProfileSection";
 
 const ProfileTab = () => {
-	const { user, logout } = useAuth();
-	const { data, loading } = useProfileTabData();
+  const { user, logout } = useAuth();
 
-	const handleLogOut = async () => {
-		try {
-			await logout();
-			router.push('/(auth)/login');
-		} catch (error) {
-			console.error('Logout failed:', error);
-			Alert.alert('Error', 'Failed to log out. Please try again.');
-		}
-	}
+  const handleLogOut = async () => {
+    try {
+      await logout();
+      router.push("/(auth)/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      Alert.alert("Error", "Failed to log out. Please try again.");
+    }
+  };
 
-	if (loading) {
-		return <ProfileSkeleton />;
-	}
+  // Dummy data for now, replace with actual user data
+  const dummyUser = {
+    id: "1",
+    fullName: "Alex Johnson",
+    username: "@alexjohnson",
+    location: "Lagos, Nigeria",
+    memberSince: "January 2024",
+    profileImage:
+      "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/ecommerce/car-interior-design.jpg",
+    placesCount: 42,
+    tripsCount: 8,
+    reviewsCount: 15,
+    savedCount: 23,
+    interests: ["Food", "Nature", "Culture", "Adventure", "Photography"],
+    recentReviews: [
+      {
+        id: "r1",
+        placeName: "Joliol Junction",
+        reviewDate: "2024-03-10",
+        reviewText:
+          "Amazing authentic Nigerian cuisine! The jollof rice was perfectly spiced.",
+        image:
+          "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
+      },
+      {
+        id: "r2",
+        placeName: "Nike Art Gallery",
+        reviewDate: "2024-03-05",
+        reviewText:
+          "Incredible collection of African art. A must-visit for culture lovers!",
+        image:
+          "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135844/samples/balloons.jpg",
+      },
+    ],
+  };
 
-	const profileUser = data?.user || user;
-	const fullName = [profileUser?.lastName, profileUser?.firstName].filter(Boolean).join(' ') || 'Guest';
-	const activity = data?.activity;
+  return (
+    <ScrollView className="flex-1 bg-gray-50">
+      <View className="bg-blue-600 h-72 absolute top-0 left-0 right-0" />
+      <View className="px-5 pt-12 pb-4">
+  {/* Profile Card */}
+  <View className="bg-white rounded-3xl shadow-md p-5 items-center mx-2 mt-20">
+    {/* Profile Section */}
+    <View className="flex-row items-start w-full mb-4">
+      {/* Profile Image */}
+      <View className="mr-4">
+        <Image
+          source={{ uri: dummyUser.profileImage }}
+          className="w-28 h-28 rounded-full border-2 border-white"
+        />
+      </View>
+      
+      {/* User Info */}
+      <View className="flex-1 pt-5">
+        <Text className="text-xl font-bold text-gray-900 mb-1">
+          {dummyUser.fullName}
+        </Text>
+        
+        <View className="flex-row items-center mb-1">
+          <Ionicons name="location-outline" size={14} color="#6b7280" />
+          <Text className="text-gray-600 text-sm ml-1">
+            {dummyUser.location}
+          </Text>
+        </View>
+        
+        <View className="flex-row items-center">
+          <Ionicons name="calendar-outline" size={14} color="#6b7280" />
+          <Text className="text-gray-600 text-sm ml-1">
+            Member since {dummyUser.memberSince}
+          </Text>
+        </View>
+      </View>
+    </View>
 
-	return (
-		<ScrollView className="flex-1 bg-sec px-5 pt-6">
-			{/* Header */}
-			<View className="items-center mb-6">
-				<Image
-					source={{uri: profileUser?.avatar || "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/ecommerce/car-interior-design.jpg"}}
-					className="w-24 h-24 rounded-full mb-3"
-				/>
-				<Text className="text-2xl font-semibold text-pry">{fullName}</Text>
-				<Text className="text-gray-500 text-sm">{profileUser?.username}</Text>
+    {/* Bio */}
+    <Text className="text-gray-700 text-start text-md w-full mb-5 ml-4">
+      Travel enthusiast exploring hidden gems around the world 🌍
+    </Text>
+
+    {/* Stats */}
+    <View className="flex-row justify-around w-full mb-6">
+      <View className="items-center">
+        <Text className="text-2xl font-bold text-blue-600">
+          {dummyUser.placesCount}
+        </Text>
+        <Text className="text-gray-500 text-xs mt-1">Places</Text>
+      </View>
+      <View className="items-center">
+        <Text className="text-2xl font-bold text-purple-600">
+          {dummyUser.tripsCount}
+        </Text>
+        <Text className="text-gray-500 text-xs mt-1">Trips</Text>
+      </View>
+      <View className="items-center">
+        <Text className="text-2xl font-bold text-orange-600">
+          {dummyUser.reviewsCount}
+        </Text>
+        <Text className="text-gray-500 text-xs mt-1">Reviews</Text>
+      </View>
+      <View className="items-center">
+        <Text className="text-2xl font-bold text-pink-600">
+          {dummyUser.savedCount}
+        </Text>
+        <Text className="text-gray-500 text-xs mt-1">Saved</Text>
+      </View>
+    </View>
+
+    {/* Action Buttons */}
+    <View className="flex-row gap-3 w-full">
+      <TouchableOpacity
+        className="flex-1 bg-blue-600 rounded-lg py-3 items-center"
+        onPress={() =>
+          router.push("/(screens)/profile/EditProfileScreen")
+        }
+      >
+        <Text className="text-white text-base font-semibold">
+          Edit Profile
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity className="flex-1 bg-gray-100 rounded-lg py-3 items-center">
+        <Text className="text-gray-700 text-base font-semibold">
+          Share Profile
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</View>
+
+      <View className="mt-4">
+        {/* Interests Section */}
+		<View className="border-b-2 border-gray-300">
+			<View className="px-4">
+
+        <ProfileSection title="Interests">
+          <View className="flex-row flex-wrap gap-2 ">
+            {dummyUser.interests.map((interest, index) => (
+              <View key={index} className="bg-blue-50 px-3 py-1 rounded-full">
+                <Text className="text-blue-600 text-sm">{interest}</Text>
+              </View>
+            ))}
+            <TouchableOpacity className="bg-gray-100 px-3 py-1 rounded-full flex-row items-center gap-1">
+              <Ionicons name="add" size={16} color="#6b7280" />
+              <Text className="text-gray-600 text-sm">Add Interest</Text>
+            </TouchableOpacity>
+          </View>
+        </ProfileSection>
+			</View>
+		</View>
+
+        {/* Achievements Section */}
+		<View className="border-b-2 border-gray-300">
+			<View className="px-4">
+
+        <ProfileSection title="Achievements">
+          <View className="flex-row justify-between py-2">
+            <View className="items-center  flex-row gap-1 border border-[#d08700] rounded-xl bg-[#fefaea] py-3 px-6">
+              <MaterialCommunityIcons
+                name="medal-outline"
+                size={30}
+                color="#f97316"
+              />
+              <Text className="text-sm font-semibold text-gray-800 mt-1">
+                Early Adaptor
+              </Text>
+            </View>
+            <View className="items-center flex-row gap-1 border border-[#d08700] rounded-xl bg-[#fefaea] py-3 px-6">
+              <MaterialCommunityIcons
+                name="medal-outline"
+                size={30}
+                color="#f97316"
+              />
+              <Text className="text-sm font-semibold text-gray-800 mt-1">
+                Local Explorer
+              </Text>
+            </View>
+          </View>
+        </ProfileSection>
 			</View>
 
-			{/* Profile Actions */}
-			<View className="bg-white rounded-2xl p-5 border border-neutral-200 mb-6">
-				<TouchableOpacity className="flex-row items-center justify-between mb-5" onPress={()=>router.push(`/(screens)/userDetails/${user?._id}`)}>
-					<View className="flex-row items-center gap-3">
-						<Ionicons name="person-outline" size={20} color="#333" />
-						<Text className="text-base text-gray-700">Edit Profile</Text>
-					</View>
-					<Ionicons name="chevron-forward" size={20} color="#aaa" />
-				</TouchableOpacity>
+		</View>
 
-				<TouchableOpacity className="flex-row items-center justify-between mb-5">
-					<View className="flex-row items-center gap-3">
-						<Feather name="settings" size={20} color="#333" />
-						<Text className="text-base text-gray-700">Account Settings</Text>
-					</View>
-					<Ionicons name="chevron-forward" size={20} color="#aaa" />
-				</TouchableOpacity>
+        {/* Recent Reviews */}
+		<View className="border-b-2 border-gray-300">
+			<View className="flex-row justify-between  px-4 py-4">
+<Text>Recent Reviews</Text>
+			   <TouchableOpacity
+            onPress={() => router.push("/(screens)/profile/ReviewsScreen")}
+            className=" items-end"
+          >
+            <Text className="text-blue-600 font-semibold">See all</Text>
+          </TouchableOpacity>
+			</View>
+        <ProfileSection title="">
+			
+          {dummyUser.recentReviews.map((review, index) => (
+            <View key={review.id} className="flex-row bg-[#eaedef] p-4 rounded-lg  items-center mb-4">
+              <Image
+                source={{ uri: review.image }}
+                className="w-16 h-16 rounded-md mr-3"
+              />
+              <View className="flex-1">
+                <Text className="font-semibold text-gray-900">
+                  {review.placeName}
+                </Text>
+                <Text className="text-gray-600 text-sm" numberOfLines={2}>
+                  {review.reviewText}
+                </Text>
+                <Text className="text-gray-400 text-xs mt-1">
+                  {review.reviewDate}
+                </Text>
+              </View>
+            </View>
+          ))}
+       
+        </ProfileSection>
+		</View>
 
-				<TouchableOpacity className="flex-row items-center justify-between">
-					<View className="flex-row items-center gap-3">
-						<MaterialCommunityIcons name="lock-outline" size={20} color="#333" />
-						<Text className="text-base text-gray-700">Privacy</Text>
-					</View>
-					<Ionicons name="chevron-forward" size={20} color="#aaa" />
-				</TouchableOpacity>
+        {/* General Settings */}
+        <ProfileSection>
+			<View className="bg-[#eaedef] my-2 p-3 rounded-lg">
+
+          <ProfileMenuItem
+          subtitle=""
+            icon={<Feather name="settings" size={20} color="#333" />}
+            title="Settings"
+            onPress={() => router.push("/(screens)/profile/SettingsScreen")}
+          />
+			</View>
+			<View className="bg-[#eaedef] my-2 p-3 rounded-lg">
+          <ProfileMenuItem
+          subtitle=""
+            icon={
+              <Ionicons name="help-circle-outline" size={20} color="#333" />
+            }
+            title="Help & Support"
+            onPress={() =>
+              router.push("/(screens)/profile/HelpAndSupportScreen")
+            }
+            isLast
+          />
 			</View>
 
-			{/* My Activity */}
-			<View className="bg-white rounded-2xl p-5 border border-neutral-200 mb-6">
-				<Text className="text-pry font-semibold text-lg mb-4">My Activity</Text>
-				<View className="flex-row justify-between mb-3">
-					<Text className="text-gray-600">Trips Created</Text>
-					<Text className="font-semibold text-pry">{activity?.tripsCreated ?? 0}</Text>
-				</View>
-				<View className="flex-row justify-between mb-3">
-					<Text className="text-gray-600">Places Visited</Text>
-					<Text className="font-semibold text-pry">{activity?.placesVisited ?? 0}</Text>
-				</View>
-				<View className="flex-row justify-between">
-					<Text className="text-gray-600">Favorites</Text>
-					<Text className="font-semibold text-pry">{activity?.favorites ?? 0}</Text>
-				</View>
-			</View>
+        </ProfileSection>
 
-			{/* Preferences / Extras */}
-			<View className="bg-white rounded-2xl p-5 border border-neutral-200 mb-6">
-				<Text className="text-pry font-semibold text-lg mb-4">Preferences</Text>
-
-				<TouchableOpacity className="flex-row items-center justify-between mb-4">
-					<Text className="text-gray-700">Notifications</Text>
-					<Ionicons name="chevron-forward" size={20} color="#aaa" />
-				</TouchableOpacity>
-
-				<TouchableOpacity className="flex-row items-center justify-between">
-					<Text className="text-gray-700">Language & Region</Text>
-					<Ionicons name="chevron-forward" size={20} color="#aaa" />
-				</TouchableOpacity>
-			</View>
-
-			{/* Logout */}
-			<TouchableOpacity className="items-center py-4" onPress={handleLogOut}>
-				<Text className="text-red-500 font-semibold">Log Out</Text>
-			</TouchableOpacity>
-		</ScrollView>
-	);
+        {/* Logout */}
+        <TouchableOpacity
+          className="bg-[#fef2f2] mb-10 mx-5 p-4 rounded-lg border border-gray-100 items-center"
+          onPress={handleLogOut}
+        >
+          <Text className="text-red-500 text-base font-semibold">Log Out</Text>
+        </TouchableOpacity>
+		<Text className="text-sm text-gray-300 text-center py-6">Setince v1.0.0</Text>
+      </View>
+    </ScrollView>
+  );
 };
 
 export default ProfileTab;
