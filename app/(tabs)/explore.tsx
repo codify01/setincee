@@ -143,7 +143,7 @@ const Explore: React.FC = () => {
 
   /* ---------------- UI ---------------- */
   return (
-    <View className="flex-1 bg-[#f3f7fa]">
+    <SafeAreaView className="flex-1 bg-[#f3f7fa]">
       {tabLoading ? (
         <ExploreSkeleton />
       ) : (
@@ -284,7 +284,7 @@ const Explore: React.FC = () => {
       </View>
       </>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 

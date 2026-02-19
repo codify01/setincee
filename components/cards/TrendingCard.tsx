@@ -24,7 +24,7 @@ const TrendingCard = ({ name, image, onPress }: TrendingCardProps) => {
 				<View className='absolute bottom-2 w-full px-3'>
 					<Text className='text-white text-2xl'>{name}</Text>
 					<View className='flex-row justify-between'>
-						<Text className='text-lg text-white'>Lagos</Text>
+						<Text className='text-lg text-white'>Ibadan</Text>
 						<View className='bg-white/50 rounded-full px-3 flex justify-center items-center'>
 							<Text>124</Text>
 						</View>

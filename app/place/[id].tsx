@@ -5,7 +5,6 @@ import {
 	Image,
 	ScrollView,
 	TouchableOpacity,
-    SafeAreaView,
 	FlatList,
 	TextInput,
 	Modal,
@@ -13,6 +12,7 @@ import {
 	Platform,
 	ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';

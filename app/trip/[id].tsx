@@ -48,25 +48,6 @@ interface TodoItem {
   completed: boolean;
 }
 
-const mockTodoItems: TodoItem[] = [
-  {
-    id: "t1",
-    title: "Visit local markets",
-    description: "Explore traditional Nigerian markets",
-    date: "Jan 2",
-    time: "10:00 AM",
-    completed: false,
-  },
-  {
-    id: "t2",
-    title: "Beach sunset picnic",
-    description: "Watch sunset at Elegushi Beach",
-    date: "Jan 2",
-    time: "6:00 PM",
-    completed: true,
-  },
-];
-
 interface TripDetails {
   id: string;
   name: string;
@@ -207,7 +188,7 @@ const TripOverview: React.FC = () => {
     useState(false);
   const [showNewActivityTimePicker, setShowNewActivityTimePicker] =
     useState(false);
-  const [todoItems, setTodoItems] = useState<TodoItem[]>(mockTodoItems);
+  const [todoItems, setTodoItems] = useState<TodoItem[]>([]);
 
   const [tripDetails, setTripDetails] = useState<TripDetails | null>(null);
   const [itineraryDays, setItineraryDays] = useState<DayPlan[]>([]);
@@ -242,6 +223,11 @@ const TripOverview: React.FC = () => {
     fetchTrip();
   }, [id]);
 
+  const getActivityImage = (activityName: string) => {
+    const match = places.find((p) => p.name === activityName);
+    return match?.image;
+  };
+
   const renderItineraryActivity = (activity: Activity) => (
     <View
       key={activity.id}
@@ -251,7 +237,9 @@ const TripOverview: React.FC = () => {
         <View className="flex-row gap-3 items-center">
           <Image
             source={{
-              uri: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
+              uri:
+                getActivityImage(activity.name) ??
+                "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
             }}
             className="w-20 h-20 rounded-lg"
             resizeMode="cover"

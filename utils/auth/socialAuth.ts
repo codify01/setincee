@@ -24,7 +24,7 @@ const getGoogleClientId = () =>
 
 const makeRedirectUri = () =>
 	AuthSession.makeRedirectUri({
-		useProxy: true,
+		// useProxy: true,
 	});
 
 export const signInWithGoogle = async (): Promise<{ user: User; idToken: string }> => {
@@ -34,10 +34,10 @@ export const signInWithGoogle = async (): Promise<{ user: User; idToken: string 
 	}
 
 	const redirectUri = makeRedirectUri();
-	const authUrl =
-		`${discovery.authorizationEndpoint}?client_id=${clientId}` +
-		`&redirect_uri=${encodeURIComponent(redirectUri)}` +
-		`&response_type=token&scope=profile%20email`;
+	// const authUrl =
+	// 	`${discovery.authorizationEndpoint}?client_id=${clientId}` +
+	// 	`&redirect_uri=${encodeURIComponent(redirectUri)}` +
+	// 	`&response_type=token&scope=profile%20email`;
 
 	const result = await AuthSession.startAsync({ authUrl }) as AuthSession.AuthSessionResult & {
 		params?: { access_token?: string };

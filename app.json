@@ -5,7 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
-    "scheme": "bryze",
+    "scheme": [
+      "bryze",
+      "com.bryze.bryze",
+      "com.googleusercontent.apps.808342927384-v3qt5j5s9oiirs6akm6bel7rrmvc9o12"
+    ],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",

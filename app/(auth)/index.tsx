@@ -6,7 +6,6 @@ import {
 	ScrollView,
 	Platform,
 	TouchableOpacity,
-	ActivityIndicator,
 } from 'react-native';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,12 +14,11 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { register, socialSignin } from '@/utils/axiosIntances';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { register } from '@/utils/axiosIntances';
 import ButtonSolid from '@/components/buttons/ButtonSolid';
-import { signInWithApple, signInWithGoogle } from '@/utils/auth/socialAuth';
-import { getDevicePushToken } from '@/utils/notifications/deviceToken';
 import { useAuth } from '@/context/AuthContext';
+import GoogleSignIn from '@/components/auth/GoogleSignIn';
+import AppleSignIn from '@/components/auth/AppleSignIn';
 
 const inputFields = [
 	{ name: 'firstName', label: 'First Name', placeholder: 'Uthman', secureEntry: false, icon: 'person' },
@@ -56,7 +54,6 @@ const validationSchema = Yup.object({
 const Index = () => {
 	const [loading, setLoading] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
-	const [socialLoading, setSocialLoading] = useState<'google' | 'apple' | null>(null);
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const { login } = useAuth();
@@ -93,51 +90,6 @@ const Index = () => {
 		}
 	};
 
-	const handleSocialAuth = async (provider: 'google' | 'apple') => {
-		setSocialLoading(provider);
-		setSubmitError(null);
-
-		try {
-			console.log('[auth:social] start', { provider });
-			const { user, idToken } =
-				provider === 'google' ? await signInWithGoogle() : await signInWithApple();
-			console.log('[auth:social] firebase ok', { uid: user.uid, email: user.email });
-
-			const deviceToken = await getDevicePushToken().catch(() => null);
-			console.log('[auth:social] device token', { hasToken: !!deviceToken });
-
-			await AsyncStorage.multiSet(
-				[
-					['authProvider', provider],
-					['firebaseIdToken', idToken],
-					['firebaseUid', user.uid],
-					['devicePushToken', deviceToken ?? ''],
-				].filter(([, value]) => value !== null && value !== undefined) as [string, string][]
-			);
-
-			const socialResponse = await socialSignin({
-				email: user.email ?? '',
-				firstName: user.displayName?.split(' ')[0] ?? '',
-				lastName: user.displayName?.split(' ').slice(1).join(' ') ?? '',
-			});
-			console.log('[auth:social] backend ok', { hasToken: !!socialResponse.data?.token });
-
-			if (socialResponse.data?.token) {
-				await login(socialResponse.data.token);
-				router.replace('/(tabs)');
-			} else {
-				router.push('/(auth)/interest');
-			}
-		} catch (error: any) {
-			const message =
-				error?.message ||
-				(error?.response?.data?.message ?? 'Unable to sign in right now.');
-			console.error('[auth:social] failed', error);
-			setSubmitError(message);
-		} finally {
-			setSocialLoading(null);
-		}
-	};
 
 	return (
 		<SafeAreaView className="flex-1 bg-white">
@@ -171,35 +123,8 @@ const Index = () => {
 
 						{/* Social Auth */}
 						<View className="flex-col gap-3 mt-4">
-							<TouchableOpacity
-								className="border border-neutral-300 py-6 rounded-lg flex-row justify-center items-center gap-2"
-								onPress={() => handleSocialAuth('google')}
-								disabled={socialLoading !== null || loading}
-							>
-								{socialLoading === 'google' ? (
-									<ActivityIndicator />
-								) : (
-									<>
-										<Ionicons name="logo-google" size={20} />
-										<Text className="text-xl">Sign Up with Google</Text>
-									</>
-								)}
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								className="bg-black py-6 rounded-lg flex-row justify-center items-center gap-2"
-								onPress={() => handleSocialAuth('apple')}
-								disabled={socialLoading !== null || loading}
-							>
-								{socialLoading === 'apple' ? (
-									<ActivityIndicator color="#fff" />
-								) : (
-									<>
-										<Ionicons name="logo-apple" size={20} color="white" />
-										<Text className="text-white text-xl">Sign Up with Apple</Text>
-									</>
-								)}
-							</TouchableOpacity>
+							<GoogleSignIn label="Sign Up with Google" />
+							<AppleSignIn label="Sign Up with Apple" />
 						</View>
 
 						<View className="flex-row items-center my-6 gap-2">
@@ -269,7 +194,7 @@ const Index = () => {
 									<ButtonSolid
 										title="Create Account"
 										onPress={() => {
-											if (loading || isSubmitting || socialLoading) return;
+											if (loading || isSubmitting) return;
 											handleSubmit();
 										}}
 										loading={loading || isSubmitting}

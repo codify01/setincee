@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StatusBar, Platform, View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import { ScrollView, StatusBar, Platform, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '@/components/home/Header';
 import SearchBar from '@/components/home/SearchBar';
 import TrendingList from '@/components/home/TrendingList';
@@ -9,7 +10,7 @@ import NearbyPlacesList from '@/components/home/NearByPlacesList';
 import LiveMap from '@/components/home/LiveMap';
 import { useAuth } from '@/context/AuthContext';
 import SearchSuggestions from '@/components/home/SearchSugestions';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AiIcon from '../../assets/icons/ai.svg';
@@ -88,13 +89,13 @@ const HomeScreen = () => {
                 <Text className='text-center text-neutral-200 '>Start planning your perfect itinerary</Text>
           </View>
         </TouchableOpacity>
+        <LiveMap location={location} loading={loadingLocation} error={locationError || error} />
         <TrendingList data={trendingData} />
 
         <RecommendedList places={recommendedPlaces} />
 
-        <LiveMap location={location} loading={loadingLocation} error={locationError || error} />
 
-        <RecentTripList trips={recentTrips} />
+        {/* <RecentTripList trips={recentTrips} /> */}
         
       </ScrollView>
       )}
