@@ -12,7 +12,12 @@
           "package_name": "com.bryze.bryze"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "808342927384-56ijkoj60foupfctf3o2vuck58v4m5ci.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDr3HhgnJ0W3Qs0So3sjXSx4ZuRnJDt1oQ"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "808342927384-56ijkoj60foupfctf3o2vuck58v4m5ci.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "808342927384-v3qt5j5s9oiirs6akm6bel7rrmvc9o12.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bryze.bryze"
+              }
+            }
+          ]
         }
       }
     }

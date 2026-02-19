@@ -1,4 +1,4 @@
-package com.codify01.setincee
+package com.bryze.bryze
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

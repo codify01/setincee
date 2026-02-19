@@ -1,4 +1,4 @@
-package com.codify01.setincee
+package com.bryze.bryze
 
 import android.app.Application
 import android.content.res.Configuration
