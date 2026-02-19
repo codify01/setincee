@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.codify01.setincee'
+    namespace 'com.bryze.bryze'
     defaultConfig {
-        applicationId 'com.codify01.setincee'
+        applicationId 'com.bryze.bryze'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

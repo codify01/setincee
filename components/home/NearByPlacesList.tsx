@@ -14,7 +14,7 @@ interface Props {
   data: NearbyPlace[];
 }
 
-const NearbyPlacesList: React.FC<Props> = ({ data }) => {
+const       NearbyPlacesList: React.FC<Props> = ({ data }) => {
   const renderItem = ({ item }: { item: NearbyPlace }) => (
     <TouchableOpacity className="mr-4 w-48 bg-white overflow-hidden active:opacity-80">
      <View className='rounded-2xl overflow-hidden'>

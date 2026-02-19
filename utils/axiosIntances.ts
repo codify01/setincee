@@ -1,9 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+
+if (!apiBaseUrl) {
+  throw new Error("Missing EXPO_PUBLIC_API_BASE_URL in environment.");
+}
+
 const AX = axios.create({
-    baseURL: "https://setince-backend.onrender.com/",
-    // baseURL: "http://192.168.0.110:3000/",
+    baseURL: apiBaseUrl,
     // headers: {
     //     "Content-Type": "application/json",
     //     "Accept": "application/json",
