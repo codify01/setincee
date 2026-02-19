@@ -11,11 +11,17 @@ import {
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
+import { useProfileTabData } from "@/hooks/useProfileTabData";
 import ProfileMenuItem from "@/components/profile/ProfileMenuItem";
 import ProfileSection from "@/components/profile/ProfileSection";
 
 const ProfileTab = () => {
   const { user, logout } = useAuth();
+  const { data: profileData, loading, error } = useProfileTabData();
+
+  // Console.log the profile data
+  console.log('Profile Data:', profileData);
+  console.log('Auth User:', user);
 
   const handleLogOut = async () => {
     try {
@@ -27,41 +33,53 @@ const ProfileTab = () => {
     }
   };
 
-  // Dummy data for now, replace with actual user data
-  const dummyUser = {
-    id: "1",
-    fullName: "Alex Johnson",
-    username: "@alexjohnson",
-    location: "Lagos, Nigeria",
-    memberSince: "January 2024",
-    profileImage:
-      "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/ecommerce/car-interior-design.jpg",
-    placesCount: 42,
-    tripsCount: 8,
-    reviewsCount: 15,
-    savedCount: 23,
-    interests: ["Food", "Nature", "Culture", "Adventure", "Photography"],
-    recentReviews: [
-      {
-        id: "r1",
-        placeName: "Joliol Junction",
-        reviewDate: "2024-03-10",
-        reviewText:
-          "Amazing authentic Nigerian cuisine! The jollof rice was perfectly spiced.",
-        image:
-          "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
-      },
-      {
-        id: "r2",
-        placeName: "Nike Art Gallery",
-        reviewDate: "2024-03-05",
-        reviewText:
-          "Incredible collection of African art. A must-visit for culture lovers!",
-        image:
-          "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135844/samples/balloons.jpg",
-      },
-    ],
+  // Use profile data from API or fallback to dummy data
+  const profileInfo = profileData || {
+    user: {
+      _id: "1",
+      firstName: "Alex",
+      lastName: "Johnson",
+      username: "@alexjohnson"
+    },
+    activity: {
+      tripsCreated: 8,
+      placesVisited: 42,
+      favorites: 23,
+      reviews: 15
+    }
   };
+
+  const displayName = profileInfo.user ? `${profileInfo.user.firstName} ${profileInfo.user.lastName}` : "Alex Johnson";
+  const username = profileInfo.user?.username || "@alexjohnson";
+  const profileImage = user?.profilePicture || "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/ecommerce/car-interior-design.jpg";
+  const placesCount = profileInfo.activity?.placesVisited || 0;
+  const tripsCount = profileInfo.activity?.tripsCreated || 0;
+  const savedCount = profileInfo.activity?.favorites || 0;
+  const reviewsCount = profileInfo.activity?.reviews || 0;
+  
+  // Format member since date from user creation date
+  const memberSince = user?.createdAt 
+    ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : "January 2024";
+
+  // Default interests and reviews (these could come from API later)
+  const interests = ["Food", "Nature", "Culture", "Adventure", "Photography"];
+  const recentReviews = [
+    {
+      id: "r1",
+      placeName: "Joliol Junction",
+      reviewDate: "2024-03-10",
+      reviewText: "Amazing authentic Nigerian cuisine! The jollof rice was perfectly spiced.",
+      image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135830/samples/landscapes/nature-mountains.jpg",
+    },
+    {
+      id: "r2",
+      placeName: "Nike Art Gallery",
+      reviewDate: "2024-03-05",
+      reviewText: "Incredible collection of African art. A must-visit for culture lovers!",
+      image: "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135844/samples/balloons.jpg",
+    },
+  ];
 
   return (
     <ScrollView className="flex-1 bg-gray-50">
@@ -74,7 +92,7 @@ const ProfileTab = () => {
       {/* Profile Image */}
       <View className="mr-4">
         <Image
-          source={{ uri: dummyUser.profileImage }}
+          source={{ uri: profileImage }}
           className="w-28 h-28 rounded-full border-2 border-white"
         />
       </View>
@@ -82,20 +100,20 @@ const ProfileTab = () => {
       {/* User Info */}
       <View className="flex-1 pt-5">
         <Text className="text-xl font-bold text-gray-900 mb-1">
-          {dummyUser.fullName}
+          {displayName}
         </Text>
         
         <View className="flex-row items-center mb-1">
           <Ionicons name="location-outline" size={14} color="#6b7280" />
           <Text className="text-gray-600 text-sm ml-1">
-            {dummyUser.location}
+            {username}
           </Text>
         </View>
         
         <View className="flex-row items-center">
           <Ionicons name="calendar-outline" size={14} color="#6b7280" />
           <Text className="text-gray-600 text-sm ml-1">
-            Member since {dummyUser.memberSince}
+            Member since {memberSince}
           </Text>
         </View>
       </View>
@@ -110,25 +128,25 @@ const ProfileTab = () => {
     <View className="flex-row justify-around w-full mb-6">
       <View className="items-center">
         <Text className="text-2xl font-bold text-blue-600">
-          {dummyUser.placesCount}
+          {placesCount}
         </Text>
         <Text className="text-gray-500 text-xs mt-1">Places</Text>
       </View>
       <View className="items-center">
         <Text className="text-2xl font-bold text-purple-600">
-          {dummyUser.tripsCount}
+          {tripsCount}
         </Text>
         <Text className="text-gray-500 text-xs mt-1">Trips</Text>
       </View>
       <View className="items-center">
         <Text className="text-2xl font-bold text-orange-600">
-          {dummyUser.reviewsCount}
+          {reviewsCount}
         </Text>
         <Text className="text-gray-500 text-xs mt-1">Reviews</Text>
       </View>
       <View className="items-center">
         <Text className="text-2xl font-bold text-pink-600">
-          {dummyUser.savedCount}
+          {savedCount}
         </Text>
         <Text className="text-gray-500 text-xs mt-1">Saved</Text>
       </View>
@@ -162,7 +180,7 @@ const ProfileTab = () => {
 
         <ProfileSection title="Interests">
           <View className="flex-row flex-wrap gap-2 ">
-            {dummyUser.interests.map((interest, index) => (
+            {interests.map((interest: string, index: number) => (
               <View key={index} className="bg-blue-50 px-3 py-1 rounded-full">
                 <Text className="text-blue-600 text-sm">{interest}</Text>
               </View>
@@ -221,7 +239,7 @@ const ProfileTab = () => {
 			</View>
         <ProfileSection title="">
 			
-          {dummyUser.recentReviews.map((review, index) => (
+          {recentReviews.map((review: any, index: number) => (
             <View key={review.id} className="flex-row bg-[#eaedef] p-4 rounded-lg  items-center mb-4">
               <Image
                 source={{ uri: review.image }}

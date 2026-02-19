@@ -136,6 +136,18 @@ const Explore: React.FC = () => {
       name={item.name}
       description={item.address}
       image={item.images?.[0]}
+      onPress={() => {
+        // Navigate to create trip with place data
+        router.push({
+          pathname: '/create-trip',
+          params: {
+            placeId: item._id,
+            placeName: item.name,
+            placeAddress: item.address,
+            placeImage: item.images?.[0]
+          }
+        });
+      }}
     />
   );
 

@@ -44,6 +44,7 @@ const Login = () => {
 	const [loading, setLoading] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [socialLoading, setSocialLoading] = useState<'google' | 'apple' | null>(null);
+	const [showPassword, setShowPassword] = useState(false);
 	const {login} = useAuth()
 
 	const handleLogin = async (values: typeof initialValues, setStatus: (v: string | null) => void) => {
@@ -191,6 +192,8 @@ const Login = () => {
 
 									{inputFields.map(({ name, label, placeholder, secureEntry, icon }) => {
 										const fieldName = name as FieldName;
+										const isPassword = name === 'password';
+										const actualSecureEntry = isPassword ? !showPassword : secureEntry;
 
 										return (
 											<View key={name} className="gap-2">
@@ -201,12 +204,21 @@ const Login = () => {
 														className="flex-1"
 														placeholder={placeholder}
 														placeholderTextColor={'#d4d4d4'}
-														secureTextEntry={secureEntry}
+														secureTextEntry={actualSecureEntry}
 														value={values[fieldName]}
 														onChangeText={handleChange(fieldName)}
 														onBlur={handleBlur(fieldName)}
 														autoCapitalize="none"
 													/>
+													{isPassword && (
+														<TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+															<Ionicons 
+																name={showPassword ? 'eye-off' : 'eye'} 
+																size={20} 
+																color={'#d4d4d4'}
+															/>
+														</TouchableOpacity>
+													)}
 												</View>
 												{touched[fieldName] && errors[fieldName] && (
 													<Text className="text-red-600 text-sm">

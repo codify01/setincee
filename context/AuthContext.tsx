@@ -12,6 +12,7 @@ export interface User {
   lastName: string;
   email: string;
   username: string;
+  createdAt?: string;
 }
 
 // Type for context data

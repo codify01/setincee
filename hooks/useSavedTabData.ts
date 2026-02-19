@@ -22,8 +22,11 @@ export const useSavedTabData = () => {
     try {
       const response = await getSavedTab();
       const payload = response?.data?.data ?? response?.data;
+      console.log('Raw Saved API Response:', response);
+      console.log('Saved Payload:', payload);
       setData(payload || null);
     } catch (err) {
+      console.error('Saved API Error:', err);
       setError('Failed to fetch saved items. Please try again later.');
     } finally {
       setLoading(false);

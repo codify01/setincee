@@ -19,6 +19,7 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AiIcon from '../../assets/icons/ai.svg';
 import Collections from '@/components/savedComponent/Collections';
+import { useSavedTabData } from '@/hooks/useSavedTabData';
 
 interface CollectionItem {
     id: string;
@@ -44,7 +45,6 @@ const categoriesTab = [
     { name: 'Nightlife', icon: '🌙', value: 'nightlife' },
 ];
 
-// Mock search results data structure matching your screenshot
 const mockSearchResults = [
     {
         _id: '1',
@@ -140,6 +140,13 @@ const mockSearchResults = [
 ];
 
 const Saved: React.FC = () => {
+    const { data: savedData, loading: savedLoading, error, refetch } = useSavedTabData();
+    
+    // Console.log saved data
+    console.log('Saved Data:', savedData);
+    console.log('Saved Loading:', savedLoading);
+    console.log('Saved Error:', error);
+
     const [places, setPlaces] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -347,6 +354,18 @@ const Saved: React.FC = () => {
             description={item.address} 
             image={item.images?.[0]} 
             collections={item.collections} // Pass collections prop
+            onPress={() => {
+                // Navigate to create trip with place data
+                router.push({
+                    pathname: '/create-trip',
+                    params: {
+                        placeId: item._id,
+                        placeName: item.name,
+                        placeAddress: item.address,
+                        placeImage: item.images?.[0]
+                    }
+                });
+            }}
         />
     );
 

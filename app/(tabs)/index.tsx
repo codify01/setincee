@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StatusBar, Platform, View, Text, StyleSheet} from 'react-native';
+import { ScrollView, StatusBar, Platform, View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import Header from '@/components/home/Header';
 import SearchBar from '@/components/home/SearchBar';
 import TrendingList from '@/components/home/TrendingList';
@@ -17,6 +17,7 @@ import CategoryTab from '@/components/home/CategoryTab';
 import HomeSkeleton from '@/components/skeletons/HomeSkeleton';
 import { useHomeTabData } from '@/hooks/useHomeTabData';
 import { useLocation } from '@/hooks/useLocation';
+import { router } from 'expo-router';
 
 const HomeScreen = () => {
   const { user } = useAuth();
@@ -98,14 +99,17 @@ const HomeScreen = () => {
       </ScrollView>
       )}
       <View className=' absolute bottom-72 right-5 '>
+        <TouchableOpacity onPress={() => router.push('/bot/botchat')}>
            <LinearGradient
                   colors={[ '#9810FA', '#155DFC']}
                   start={{ x: 1, y: 0 }}
                   end={{ x: 0, y: 1 }} 
                   style={styles.gradientButton}
-                >
+                  >
                   <AiIcon width={30} height={25} />
                 </LinearGradient>
+                  
+                          </TouchableOpacity>
         </View>
     </SafeAreaView>
   );
