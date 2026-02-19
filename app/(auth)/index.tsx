@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ButtonSolid from '@/components/buttons/ButtonSolid';
 import { signInWithApple, signInWithGoogle } from '@/utils/auth/socialAuth';
 import { getDevicePushToken } from '@/utils/notifications/deviceToken';
+import { useAuth } from '@/context/AuthContext';
 
 const inputFields = [
 	{ name: 'firstName', label: 'First Name', placeholder: 'Uthman', secureEntry: false, icon: 'person' },
@@ -56,14 +57,24 @@ const Index = () => {
 	const [loading, setLoading] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [socialLoading, setSocialLoading] = useState<'google' | 'apple' | null>(null);
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const { login } = useAuth();
 
 	const handleSignUp = async (values: typeof initialValues, setStatus: (v: string | null) => void) => {
 		setLoading(true);
 		setSubmitError(null);
 		setStatus(null);
 		try {
-			await register(values);
-			router.push('/(auth)/interest');
+			const response = await register(values);
+			// After successful registration, login the user
+			if (response.data?.token) {
+				await login(response.data.token);
+				router.replace('/(tabs)');
+			} else {
+				// If no token returned, go to interest screen
+				router.push('/(auth)/interest');
+			}
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				const message =
@@ -199,6 +210,9 @@ const Index = () => {
 
 									{inputFields.map(({ name, label, placeholder, secureEntry, icon }) => {
 										const fieldName = name as FieldName;
+										const isPassword = name === 'password';
+										const isConfirmPassword = name === 'confirmPassword';
+										const actualSecureEntry = isPassword ? !showPassword : isConfirmPassword ? !showConfirmPassword : secureEntry;
 
 										return (
 											<View key={name} className="gap-2">
@@ -209,12 +223,23 @@ const Index = () => {
 														className="flex-1"
 														placeholder={placeholder}
 														placeholderTextColor={'#d4d4d4'}
-														secureTextEntry={secureEntry}
+														secureTextEntry={actualSecureEntry}
 														value={values[fieldName]}
 														onChangeText={handleChange(fieldName)}
 														onBlur={handleBlur(fieldName)}
 														autoCapitalize="none"
 													/>
+													{(isPassword || isConfirmPassword) && (
+														<TouchableOpacity 
+															onPress={() => isPassword ? setShowPassword(!showPassword) : setShowConfirmPassword(!showConfirmPassword)}
+														>
+															<Ionicons 
+																name={isPassword ? (showPassword ? 'eye-off' : 'eye') : (showConfirmPassword ? 'eye-off' : 'eye')} 
+																size={20} 
+																color={'#d4d4d4'}
+															/>
+														</TouchableOpacity>
+													)}
 												</View>
 												{touched[fieldName] && errors[fieldName] && (
 													<Text className="text-red-600 text-sm">

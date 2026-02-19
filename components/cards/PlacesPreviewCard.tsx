@@ -9,11 +9,21 @@ interface Props {
     description: string;
     image?: string;
     collections?: string[]; // Add collections prop
+    onPress?: () => void; // Add optional onPress prop
 }
 
-const PlacesPreviewCard = ({ name, description, id, image, collections }: Props) => {
+const PlacesPreviewCard = ({ name, description, id, image, collections, onPress }: Props) => {
+    const handlePress = () => {
+        if (onPress) {
+            onPress();
+        } else {
+            // Default navigation to place details
+            router.push(`/(screens)/PlaceDetailsScreen/${id}`);
+        }
+    };
+
     return (
-        <TouchableOpacity onPress={() => router.push(`/(screens)/PlaceDetailsScreen/${id}`)}>
+        <TouchableOpacity onPress={handlePress}>
             <View className="flex-row justify-between items-center border border-neutral-300 mb-3 rounded-lg  p-3 bg-white">
                 <View className="flex-row gap-3 items-center flex-1">
                     <Image

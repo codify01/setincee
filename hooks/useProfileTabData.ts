@@ -11,8 +11,9 @@ export interface ProfileUser {
 
 export interface ProfileActivity {
   tripsCreated: number;
-  placesVisited: number;
+  placesVisited: number;  
   favorites: number;
+  reviews: number;
 }
 
 export interface ProfileTabData {
@@ -32,6 +33,8 @@ export const useProfileTabData = () => {
       const response = await getProfileTab();
       const payload = response?.data?.data ?? response?.data;
       setData(payload || null);
+      console.log(payload);
+      
     } catch (err) {
       setError('Failed to fetch profile data. Please try again later.');
     } finally {
