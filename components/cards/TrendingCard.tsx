@@ -1,16 +1,18 @@
-import { View, Text, Image, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, ImageBackground } from 'react-native';
 import React from 'react';
-import { Link } from 'expo-router';
-
 
 interface TrendingCardProps {
-    name: string;
-    image: any; // Adjust type as needed, e.g., ImageSourcePropType
+	name: string;
+	image: any;
+	onPress?: () => void;
 }
 
-const TrendingCard = ({ name, image }:TrendingCardProps) => {
+const TrendingCard = ({ name, image, onPress }: TrendingCardProps) => {
 	return (
-		<TouchableOpacity className="mr-4 w-60 bg-white rounded-xl overflow-hidden shadow-sm">
+		<TouchableOpacity
+			className="mr-4 w-60 bg-white rounded-xl overflow-hidden shadow-sm"
+			onPress={onPress}
+		>
 			<ImageBackground
 				source={{uri: image}}
 				className="w-full h-72 rounded-lg"

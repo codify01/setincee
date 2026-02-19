@@ -33,6 +33,8 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="setincee"/>
+        <data android:scheme="bryze"/>
+        <data android:scheme="exp+bryze"/>
       </intent-filter>
     </activity>
   </application>

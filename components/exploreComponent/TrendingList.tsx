@@ -1,6 +1,7 @@
 import React from 'react';
 import { FlatList, Text, View } from 'react-native';
 import TrendingFoodCard from '@/components/cards/TrendingFoodCard'; 
+import { router } from 'expo-router';
 
 interface Item {
 	id: string;
@@ -35,6 +36,7 @@ const TrendingList: React.FC<Props> = ({ data }) => {
 						rating={item.rating}
 						reviews={item.reviews}
 						image={item.image} 
+						onPress={() => router.push(`/place/${item.id}`)}
 					/>
 				)}
 				showsHorizontalScrollIndicator={false}

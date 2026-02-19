@@ -9,6 +9,7 @@ interface TrendingCardProps {
     rating: number;
     reviews: number;
     image: any;
+    onPress?: () => void;
     width?: string | number; // Added for different widths
     showDetails?: boolean; // Added to control what to show
     variant?: 'default' | 'compact' | 'detailed'; // Added for different styles
@@ -21,6 +22,7 @@ const TrendingCard = ({
     rating, 
     reviews, 
     image,
+    onPress,
     width = 'w-96', // Default width
     showDetails = true, // Default to showing details
     variant = 'default' // Default variant
@@ -59,7 +61,7 @@ const TrendingCard = ({
     const variantStyle = getVariantStyle();
 
     return (
-        <TouchableOpacity className={variantStyle.container}>
+        <TouchableOpacity className={variantStyle.container} onPress={onPress}>
             <ImageBackground
                 source={{ uri: image }}
                 className={`w-full ${variantStyle.imageHeight}`}

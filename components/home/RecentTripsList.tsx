@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
 
 interface Trip {
   id: string;
@@ -14,7 +15,10 @@ interface Props {
 
 const RecentTripList: React.FC<Props> = ({ trips }) => {
   const renderItem = ({ item }: { item: Trip }) => (
-    <TouchableOpacity className="mr-4 w-48 rounded-xl overflow-hidden bg-white border border-gray-200 active:opacity-80">
+    <TouchableOpacity
+      className="mr-4 w-48 rounded-xl overflow-hidden bg-white border border-gray-200 active:opacity-80"
+      onPress={() => router.push(`/trip/${item.id}`)}
+    >
       <Image source={typeof item.image === 'string' ? { uri: item.image } : item.image} className="w-full h-24" resizeMode="cover" />
       <View className="p-2">
         <Text className="text-lg font-semibold">{item.name}</Text>

@@ -18,7 +18,7 @@ const PlacesPreviewCard = ({ name, description, id, image, collections, onPress 
             onPress();
         } else {
             // Default navigation to place details
-            router.push(`/(screens)/PlaceDetailsScreen/${id}`);
+            router.push(`/place/${id}`);
         }
     };
 

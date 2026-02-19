@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AX, { getUserProfile } from "@/utils/axiosIntances"; // your axios setup
+import { getUserProfile } from "@/utils/axiosIntances"; // your axios setup
 
 // Type for the user object
 export interface User {
@@ -40,11 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const storedToken = await AsyncStorage.getItem("token");
         if (storedToken) {
           setToken(storedToken);
-        const userResponse =  await fetchUser(storedToken);
-
-        console.log("userResponse", userResponse);
-        
-
+          await fetchUser();
         }
       } catch (error) {
         console.error("Failed to load auth data:", error);
@@ -56,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   // Fetch user from API
-  const fetchUser = async (authToken: string) => {
+  const fetchUser = async () => {
     try {
       const response = await getUserProfile();
       setUser(response.data.user);
@@ -71,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await AsyncStorage.setItem("token", userToken);
       setToken(userToken);
-      await fetchUser(userToken);
+      await fetchUser();
     } catch (error) {
       console.error("Login failed:", error);
     }

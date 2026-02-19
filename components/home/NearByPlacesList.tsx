@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { FlatList, Image, ImageBackground, Text, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
 
 interface NearbyPlace {
   id: string;
@@ -16,7 +17,10 @@ interface Props {
 
 const       NearbyPlacesList: React.FC<Props> = ({ data }) => {
   const renderItem = ({ item }: { item: NearbyPlace }) => (
-    <TouchableOpacity className="mr-4 w-48 bg-white overflow-hidden active:opacity-80">
+    <TouchableOpacity
+      className="mr-4 w-48 bg-white overflow-hidden active:opacity-80"
+      onPress={() => router.push(`/place/${item.id}`)}
+    >
      <View className='rounded-2xl overflow-hidden'>
        <ImageBackground source={typeof item.image === 'string' ? { uri: item.image } : item.image} className="w-full h-52 " >
         <View className='bg-white w-16 h-8 rounded-full top-2 right-2 absolute flex-row items-center justify-center gap-1 px-2'>

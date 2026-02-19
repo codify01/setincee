@@ -14,14 +14,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useProfileTabData } from "@/hooks/useProfileTabData";
 import ProfileMenuItem from "@/components/profile/ProfileMenuItem";
 import ProfileSection from "@/components/profile/ProfileSection";
+import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
 
 const ProfileTab = () => {
   const { user, logout } = useAuth();
   const { data: profileData, loading, error } = useProfileTabData();
-
-  // Console.log the profile data
-  console.log('Profile Data:', profileData);
-  console.log('Auth User:', user);
 
   const handleLogOut = async () => {
     try {
@@ -33,33 +30,28 @@ const ProfileTab = () => {
     }
   };
 
-  // Use profile data from API or fallback to dummy data
-  const profileInfo = profileData || {
-    user: {
-      _id: "1",
-      firstName: "Alex",
-      lastName: "Johnson",
-      username: "@alexjohnson"
-    },
-    activity: {
-      tripsCreated: 8,
-      placesVisited: 42,
-      favorites: 23,
-      reviews: 15
-    }
+  const apiUser = profileData?.user;
+  const mergedUser = {
+    firstName: apiUser?.firstName ?? user?.firstName ?? "Guest",
+    lastName: apiUser?.lastName ?? user?.lastName ?? "",
+    username: apiUser?.username ?? user?.username ?? "@guest",
+    avatar: apiUser?.avatar ?? user?.profilePicture,
+    createdAt: user?.createdAt,
   };
 
-  const displayName = profileInfo.user ? `${profileInfo.user.firstName} ${profileInfo.user.lastName}` : "Alex Johnson";
-  const username = profileInfo.user?.username || "@alexjohnson";
-  const profileImage = user?.profilePicture || "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/ecommerce/car-interior-design.jpg";
-  const placesCount = profileInfo.activity?.placesVisited || 0;
-  const tripsCount = profileInfo.activity?.tripsCreated || 0;
-  const savedCount = profileInfo.activity?.favorites || 0;
-  const reviewsCount = profileInfo.activity?.reviews || 0;
+  const displayName = `${mergedUser.firstName} ${mergedUser.lastName}`.trim();
+  const username = mergedUser.username || "@guest";
+  const profileImage =
+    mergedUser.avatar ||
+    "https://res.cloudinary.com/dpffwzcd8/image/upload/v1712135827/samples/ecommerce/car-interior-design.jpg";
+  const placesCount = profileData?.activity?.placesVisited || 0;
+  const tripsCount = profileData?.activity?.tripsCreated || 0;
+  const savedCount = profileData?.activity?.favorites || 0;
+  const reviewsCount = profileData?.activity?.reviews || 0;
   
   // Format member since date from user creation date
-  const memberSince = user?.createdAt 
-    ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  const memberSince = mergedUser.createdAt
+    ? new Date(mergedUser.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : "January 2024";
 
   // Default interests and reviews (these could come from API later)
@@ -81,8 +73,17 @@ const ProfileTab = () => {
     },
   ];
 
+  if (loading) {
+    return <ProfileSkeleton />;
+  }
+
   return (
     <ScrollView className="flex-1 bg-gray-50">
+      {error ? (
+        <View className="px-5 pt-6">
+          <Text className="text-center text-gray-500">{error}</Text>
+        </View>
+      ) : null}
       <View className="bg-blue-600 h-72 absolute top-0 left-0 right-0" />
       <View className="px-5 pt-12 pb-4">
   {/* Profile Card */}

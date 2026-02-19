@@ -16,7 +16,7 @@ const NearbyPreview: React.FC<NearbyPreviewProps> = ({ placeCount, onOpenMap }) 
                     <Text className="text-xl font-bold text-gray-900">See what's nearby</Text>
                 </View>
                 <TouchableOpacity 
-                    // onPress={onOpenMap}
+                    onPress={onOpenMap}
                     className="bg-white border border-gray-200 px-4 py-2 rounded-full flex-row items-center"
                 >
                     <Ionicons name="map-outline" size={18} color="#3b82f6" />

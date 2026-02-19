@@ -9,6 +9,8 @@ import {
   StyleSheet,
   Modal,
   Image,
+  SafeAreaView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -136,18 +138,6 @@ const Explore: React.FC = () => {
       name={item.name}
       description={item.address}
       image={item.images?.[0]}
-      onPress={() => {
-        // Navigate to create trip with place data
-        router.push({
-          pathname: '/create-trip',
-          params: {
-            placeId: item._id,
-            placeName: item.name,
-            placeAddress: item.address,
-            placeImage: item.images?.[0]
-          }
-        });
-      }}
     />
   );
 
@@ -255,8 +245,30 @@ const Explore: React.FC = () => {
       </ScrollView>
 
       {/* MAP MODAL */}
-      <Modal visible={showMapModal} animationType="slide">
-        <LiveMap location={location} loading={loadingLocation} error={locationError || tabError} />
+      <Modal
+        visible={showMapModal}
+        animationType="slide"
+        presentationStyle={Platform.OS === 'ios' ? 'pageSheet' : 'fullScreen'}
+        onRequestClose={() => setShowMapModal(false)}
+      >
+        <SafeAreaView className="flex-1 bg-white">
+          <View className="absolute top-0 left-0 right-0 z-10 px-4 py-3 flex-row items-center justify-between">
+            <View className="w-12 h-1.5 bg-gray-300 rounded-full self-center absolute left-1/2 -ml-6 top-2" />
+            <TouchableOpacity
+              onPress={() => setShowMapModal(false)}
+              className="bg-white/90 rounded-full p-2 shadow-md"
+            >
+              <Ionicons name="chevron-down" size={22} color="#111827" />
+            </TouchableOpacity>
+          </View>
+          <LiveMap
+            fullScreen
+            places={places}
+            location={location}
+            loading={loadingLocation}
+            error={locationError || tabError}
+          />
+        </SafeAreaView>
       </Modal>
 
       {/* AI BUTTON */}

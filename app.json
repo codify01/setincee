@@ -1,30 +1,37 @@
 {
   "expo": {
-    "name": "setincee",
+    "name": "Bryze",
     "slug": "setincee",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "bryze",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "splash": {
-      "image": "./assets/images/setince.png",
+      "image": "./assets/images/logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bryze.bryze"
+      "bundleIdentifier": "com.bryze.bryze",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We use your location to show directions to places."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.bryze.bryze"
+      "package": "com.bryze.bryze",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -38,7 +45,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/icon.png",
+          "icon": "./assets/images/logo.png",
           "color": "#ffffff"
         }
       ]

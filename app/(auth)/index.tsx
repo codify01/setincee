@@ -15,7 +15,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { register } from '@/utils/axiosIntances';
+import { register, socialSignin } from '@/utils/axiosIntances';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ButtonSolid from '@/components/buttons/ButtonSolid';
 import { signInWithApple, signInWithGoogle } from '@/utils/auth/socialAuth';
@@ -98,10 +98,13 @@ const Index = () => {
 		setSubmitError(null);
 
 		try {
+			console.log('[auth:social] start', { provider });
 			const { user, idToken } =
 				provider === 'google' ? await signInWithGoogle() : await signInWithApple();
+			console.log('[auth:social] firebase ok', { uid: user.uid, email: user.email });
 
 			const deviceToken = await getDevicePushToken().catch(() => null);
+			console.log('[auth:social] device token', { hasToken: !!deviceToken });
 
 			await AsyncStorage.multiSet(
 				[
@@ -112,11 +115,24 @@ const Index = () => {
 				].filter(([, value]) => value !== null && value !== undefined) as [string, string][]
 			);
 
-			router.push('/(auth)/interest');
+			const socialResponse = await socialSignin({
+				email: user.email ?? '',
+				firstName: user.displayName?.split(' ')[0] ?? '',
+				lastName: user.displayName?.split(' ').slice(1).join(' ') ?? '',
+			});
+			console.log('[auth:social] backend ok', { hasToken: !!socialResponse.data?.token });
+
+			if (socialResponse.data?.token) {
+				await login(socialResponse.data.token);
+				router.replace('/(tabs)');
+			} else {
+				router.push('/(auth)/interest');
+			}
 		} catch (error: any) {
 			const message =
 				error?.message ||
 				(error?.response?.data?.message ?? 'Unable to sign in right now.');
+			console.error('[auth:social] failed', error);
 			setSubmitError(message);
 		} finally {
 			setSocialLoading(null);

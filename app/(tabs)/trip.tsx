@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
 
 const Trips: React.FC = () => {
     const { data, loading, refreshing, refresh } = useTripsTabData();
-    // console.log('Trips data:', data);
+    console.log('Trips data:', data);
     
     const trips: Trip[] = Array.isArray(data?.trips) && data.trips.length > 0 ? data.trips : []; // Use mock data if API data is not available
     const hasTrips = trips.length > 0; 

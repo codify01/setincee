@@ -9,7 +9,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>setincee</string>
+    <string>Bryze</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -29,8 +29,14 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>setincee</string>
+          <string>bryze</string>
           <string>com.bryze.bryze</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>exp+bryze</string>
         </array>
       </dict>
     </array>
@@ -56,7 +62,7 @@
     <key>NSLocationAlwaysUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your location</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <string>We use your location to show directions to places.</string>
     <key>NSRemindersFullAccessUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your reminders</string>
     <key>NSRemindersUsageDescription</key>

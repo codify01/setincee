@@ -79,7 +79,7 @@ const HomeScreen = () => {
         {/* <CategoryList categories={categories} /> */}
 
         <NearbyPlacesList data={nearbyPlaces} />
-        <View>
+        <TouchableOpacity onPress={() => router.push('/create-trip')}>
           <View className='border border-dashed h-[200px] rounded-lg flex-col items-center justify-center gap-5'>
                 <View className='w-16 h-16 rounded-full flex justify-center items-center bg-sec'>
                   <Ionicons name='add' size={30} color={'white'}/>
@@ -87,7 +87,7 @@ const HomeScreen = () => {
                 <Text className='text-center text-xl font-medium'>Create Your First Trip</Text>
                 <Text className='text-center text-neutral-200 '>Start planning your perfect itinerary</Text>
           </View>
-        </View>
+        </TouchableOpacity>
         <TrendingList data={trendingData} />
 
         <RecommendedList places={recommendedPlaces} />

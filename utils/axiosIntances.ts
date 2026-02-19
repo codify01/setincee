@@ -35,6 +35,8 @@ AX.interceptors.request.use(
 
 export const register = async (data:object) => AX.post('/api/auth/register', data)
 export const signin = async (data:object) => AX.post('/api/auth/login', data)
+export const socialSignin = async (data: { email: string; firstName: string; lastName: string }) =>
+  AX.post('/api/auth/social', data)
 
 export const getUserProfile = async () => AX.get('/api/users/profile')
 
